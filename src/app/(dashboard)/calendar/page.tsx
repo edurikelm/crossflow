@@ -42,6 +42,8 @@ import { es } from "date-fns/locale";
 import type { ScheduledClassWithDetails, ClassTemplate, CoachWithProfile } from "@/types";
 import { useAuthStore } from "@/store";
 
+type CoachSelect = { id: string; full_name: string };
+
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
 
 export default function CalendarPage() {
@@ -49,7 +51,7 @@ export default function CalendarPage() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [scheduledClasses, setScheduledClasses] = useState<ScheduledClassWithDetails[]>([]);
   const [classTemplates, setClassTemplates] = useState<ClassTemplate[]>([]);
-  const [coaches, setCoaches] = useState<CoachWithProfile[]>([]);
+  const [coaches, setCoaches] = useState<CoachSelect[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{ date: string; hour: number } | null>(null);
@@ -93,9 +95,10 @@ export default function CalendarPage() {
       supabase.from("class_templates").select("*").eq("is_active", true),
     ]);
 
-    let coachesRes = { data: [] as CoachWithProfile[], error: null };
+    let coachesRes: { data: CoachSelect[]; error: null } = { data: [], error: null };
     if (gymId) {
-      coachesRes = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", gymId);
+      const res = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", gymId);
+      if (!res.error) coachesRes = { data: res.data as CoachSelect[], error: null };
     }
 
     if (classesRes.data) {

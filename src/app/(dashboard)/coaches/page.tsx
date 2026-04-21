@@ -223,10 +223,10 @@ export default function CoachesPage() {
                 return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
-                    {coach.full_name || "Sin nombre"}
+                    {coach.profile?.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{coach.email || "-"}</TableCell>
-                  <TableCell>{coach.phone || "-"}</TableCell>
+                  <TableCell>{coach.profile?.email || "-"}</TableCell>
+                  <TableCell>{coach.profile?.phone || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {coach.specialty?.slice(0, 2).map((s) => (
