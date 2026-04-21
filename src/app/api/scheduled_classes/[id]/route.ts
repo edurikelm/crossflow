@@ -10,8 +10,8 @@ export async function GET(
   const { id } = await params;
 
   const { data, error } = await supabase
-    .from('classes')
-    .select('*, class_templates(*), coaches(*)')
+    .from('scheduled_classes')
+    .select('*, class_templates(*), profiles(*)')
     .eq('id', id)
     .single();
 
@@ -37,7 +37,7 @@ export async function PUT(
     const validated = scheduledClassSchema.partial().parse(body);
 
     const { data, error } = await supabase
-      .from('classes')
+      .from('scheduled_classes')
       .update(validated)
       .eq('id', id)
       .select()
@@ -64,7 +64,7 @@ export async function DELETE(
   const { id } = await params;
 
   const { error } = await supabase
-    .from('classes')
+    .from('scheduled_classes')
     .delete()
     .eq('id', id);
 

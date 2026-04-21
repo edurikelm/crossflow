@@ -63,6 +63,27 @@ export async function DELETE(
   const supabase = await createClient();
   const { id } = await params;
 
+  // Delete attendance records for scheduled classes of this template
+  const { data: scheduledClasses } = await supabase
+    .from('scheduled_classes')
+    .select('id')
+    .eq('class_template_id', id);
+
+  if (scheduledClasses && scheduledClasses.length > 0) {
+    const scheduledClassIds = scheduledClasses.map((sc) => sc.id);
+    await supabase
+      .from('attendance')
+      .delete()
+      .in('scheduled_class_id', scheduledClassIds);
+  }
+
+  // Delete scheduled classes of this template
+  await supabase
+    .from('scheduled_classes')
+    .delete()
+    .eq('class_template_id', id);
+
+  // Delete the class template
   const { error } = await supabase
     .from('class_templates')
     .delete()

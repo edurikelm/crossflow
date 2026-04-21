@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Clock, Users, Trash2 } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -54,6 +54,8 @@ export default function CalendarPage() {
   const [coaches, setCoaches] = useState<CoachSelect[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<ScheduledClassWithDetails | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ date: string; hour: number } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -263,6 +265,11 @@ export default function CalendarPage() {
                           key={cls.id}
                           className="rounded-md p-1.5 text-xs mb-1 cursor-pointer hover:opacity-80 transition-opacity"
                           style={{ backgroundColor: cls.class_templates?.color || "#3B82F6" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEvent(cls);
+                            setIsEventDialogOpen(true);
+                          }}
                         >
                           <p className="font-medium text-white truncate">
                             {cls.class_templates?.name || "Clase"}
@@ -321,6 +328,122 @@ export default function CalendarPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Event Details Dialog */}
+      <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              {selectedEvent?.class_templates && (
+                <div
+                  className="h-4 w-4 rounded-full"
+                  style={{ backgroundColor: selectedEvent.class_templates.color }}
+                />
+              )}
+              <DialogTitle>{selectedEvent?.class_templates?.name || "Clase"}</DialogTitle>
+            </div>
+            <DialogDescription>
+              Información de la clase programada
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEvent && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Fecha</p>
+                  <p className="font-medium">
+                    {format(parseISO(selectedEvent.date), "dd/MM/yyyy")}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Hora</p>
+                  <p className="font-medium">
+                    {selectedEvent.start_time?.slice(0, 5)} - {selectedEvent.end_time?.slice(0, 5)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Coach</p>
+                <p className="font-medium">{selectedEvent.profiles?.full_name || "No asignado"}</p>
+              </div>
+
+              {selectedEvent.class_templates?.description && (
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Descripción</p>
+                  <p className="text-sm">{selectedEvent.class_templates.description}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Duración</p>
+                  <p className="font-medium">{selectedEvent.class_templates?.duration_minutes || 60} min</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Cupos</p>
+                  <p className="font-medium flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    {selectedEvent.spots_remaining} / {selectedEvent.capacity}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Nivel</p>
+                <p className="font-medium">
+                  {selectedEvent.class_templates?.level === "all_levels"
+                    ? "Todos los niveles"
+                    : selectedEvent.class_templates?.level === "beginner"
+                    ? "Principiante"
+                    : selectedEvent.class_templates?.level === "intermediate"
+                    ? "Intermedio"
+                    : selectedEvent.class_templates?.level === "advanced"
+                    ? "Avanzado"
+                    : selectedEvent.class_templates?.level}
+                </p>
+              </div>
+
+              {selectedEvent.class_templates?.focus_area && selectedEvent.class_templates.focus_area.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Enfoque</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedEvent.class_templates.focus_area.map((area) => (
+                      <span
+                        key={area}
+                        className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs"
+                      >
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter className="flex-row justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={async () => {
+                if (!selectedEvent) return;
+                if (!confirm("¿Eliminar esta clase?")) return;
+
+                await fetch(`/api/scheduled_classes/${selectedEvent.id}`, { method: "DELETE" });
+                setIsEventDialogOpen(false);
+                fetchData(currentWeek);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Eliminar
+            </Button>
+            <Button variant="outline" onClick={() => setIsEventDialogOpen(false)}>
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Class Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
