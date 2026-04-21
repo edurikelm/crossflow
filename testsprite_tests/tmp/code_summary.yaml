@@ -1,0 +1,155 @@
+version: "2"
+type: frontend
+tech_stack:
+  - Next.js 16 (App Router)
+  - TypeScript
+  - Tailwind CSS
+  - Radix UI
+  - Zustand
+  - Supabase
+  - react-hook-form + zod
+routes:
+  - path: /login
+    file: src/app/(auth)/login/page.tsx
+    auth_required: false
+    description: User login page
+  - path: /
+    file: src/app/(dashboard)/page.tsx
+    auth_required: true
+    description: Dashboard home
+  - path: /athletes
+    file: src/app/(dashboard)/athletes/page.tsx
+    auth_required: true
+    description: Athletes management
+  - path: /coaches
+    file: src/app/(dashboard)/coaches/page.tsx
+    auth_required: true
+    description: Coaches management
+  - path: /classes
+    file: src/app/(dashboard)/classes/page.tsx
+    auth_required: true
+    description: Class templates management
+  - path: /calendar
+    file: src/app/(dashboard)/calendar/page.tsx
+    auth_required: true
+    description: Schedule calendar view
+  - path: /tickets
+    file: src/app/(dashboard)/tickets/page.tsx
+    auth_required: true
+    description: Support tickets
+  - path: /notifications
+    file: src/app/(dashboard)/notifications/page.tsx
+    auth_required: true
+    description: User notifications
+  - path: /settings
+    file: src/app/(dashboard)/settings/page.tsx
+    auth_required: true
+    description: App settings
+features:
+  - name: User Login
+    description: Login with email and password credentials
+    files:
+      - src/app/(auth)/login/page.tsx
+    entry_route: /login
+    user_interactions:
+      - Fill email input field
+      - Fill password input field
+      - Click Login button to submit
+      - See error message on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: Supabase Auth
+    auth_required: false
+  - name: Dashboard
+    description: Main dashboard with statistics and overview
+    files:
+      - src/app/(dashboard)/page.tsx
+      - src/components/layout/DashboardHeader.tsx
+      - src/components/layout/DashboardSidebar.tsx
+    entry_route: /
+    user_interactions:
+      - View dashboard stats
+      - Navigate via sidebar
+      - Access quick actions
+    auth_required: true
+  - name: Athletes Management
+    description: CRUD operations for athletes
+    files:
+      - src/app/(dashboard)/athletes/page.tsx
+    entry_route: /athletes
+    user_interactions:
+      - View athletes list
+      - Add new athlete
+      - Edit athlete details
+      - Delete athlete
+    api_calls: []
+    auth_required: true
+  - name: Coaches Management
+    description: CRUD operations for coaches
+    files:
+      - src/app/(dashboard)/coaches/page.tsx
+    entry_route: /coaches
+    user_interactions:
+      - View coaches list
+      - Add new coach
+      - Edit coach details
+      - Delete coach
+    api_calls: []
+    auth_required: true
+  - name: Classes Management
+    description: Create and manage class templates
+    files:
+      - src/app/(dashboard)/classes/page.tsx
+    entry_route: /classes
+    user_interactions:
+      - View class templates list
+      - Create new class template
+      - Edit class details
+      - Delete class template
+    api_calls: []
+    auth_required: true
+  - name: Calendar View
+    description: Schedule calendar for classes
+    files:
+      - src/app/(dashboard)/calendar/page.tsx
+    entry_route: /calendar
+    user_interactions:
+      - View calendar with scheduled classes
+      - Navigate between dates
+    api_calls: []
+    auth_required: true
+  - name: Tickets System
+    description: Support ticket management
+    files:
+      - src/app/(dashboard)/tickets/page.tsx
+    entry_route: /tickets
+    user_interactions:
+      - View tickets list
+      - Create new ticket
+      - View ticket status
+    api_calls: []
+    auth_required: true
+  - name: Notifications
+    description: In-app notification system
+    files:
+      - src/app/(dashboard)/notifications/page.tsx
+    entry_route: /notifications
+    user_interactions:
+      - View notifications list
+      - Mark notification as read
+    api_calls: []
+    auth_required: true
+  - name: Settings
+    description: Application settings
+    files:
+      - src/app/(dashboard)/settings/page.tsx
+    entry_route: /settings
+    user_interactions:
+      - View settings options
+      - Modify settings
+    api_calls: []
+    auth_required: true
+known_limitations:
+  - issue: Admin CRUD is UI-only, not connected to backend API
+    location: src/app/(dashboard)/athletes/page.tsx, src/app/(dashboard)/coaches/page.tsx
+    impact: Create/update/delete only modify local state, not persisted to Supabase

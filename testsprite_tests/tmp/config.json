@@ -1,0 +1,20 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "loginUser": "admin@crossfit.com",
+  "loginPassword": "Admin123!",
+  "executionArgs": {
+    "projectName": "crossflow",
+    "projectPath": "C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-rSt3EDhYtJwJPODaVfd9naZ_J4elyqJF09GguIgKB3AAANIVGPxjJ8mTcCv9h4E4TjhHfYJfuMZwcrUJa7kjE7eZPKp3aNUqKI8rTXLEiHEZxLe5CGfk50Sf9WUtNIItlcE"
+    }
+  },
+  "serverPort": 55556,
+  "proxy": "http://b289c4db-85d4-4cf4-8780-7b40d99a1a4a:awcKsQ14yMcF2SddNnrLa9IqiuPxHKEw@tun.testsprite.com:8080"
+}

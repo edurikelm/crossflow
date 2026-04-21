@@ -1,0 +1,119 @@
+# Crossflow - Product Requirements Document
+
+## 1. Project Overview
+
+**Project Name:** Crossflow
+**Type:** Gym Management SaaS
+**Core Functionality:** A dashboard for managing gyms, coaches, athletes, classes, schedules, and memberships.
+
+## 2. Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **UI Components:** Radix UI primitives
+- **Forms:** react-hook-form + zod + @hookform/resolvers
+- **State Management:** Zustand
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **Styling:** Tailwind CSS
+
+## 3. User Roles
+
+- **Athletes:** Gym members who attend classes
+- **Coaches:** Instructors who teach classes
+- **Admins:** Gym managers with full CRUD access
+
+## 4. Data Models
+
+### Gyms
+- id, name, address, phone, created_at
+
+### Coaches
+- id, name, email, phone, specialty, gym_id, created_at
+
+### Athletes
+- id, name, email, phone, membership_plan_id, gym_id, created_at
+
+### Class Templates
+- id, name, description, duration, coach_id, gym_id, created_at
+
+### Classes (instances)
+- id, class_template_id, scheduled_at, gym_id, created_at
+
+### Membership Plans
+- id, name, price, duration_days, features, gym_id, created_at
+
+### Schedules
+- id, class_id, coach_id, room, created_at
+
+### Attendance
+- id, class_id, athlete_id, check_in, created_at
+
+### Tickets
+- id, athlete_id, subject, description, status, created_at
+
+### Notifications
+- id, user_id, message, read, created_at
+
+## 5. Pages & Routes
+
+| Route | Description | Auth |
+|-------|-------------|------|
+| /login | Login page | No |
+| / | Dashboard home | Yes |
+| /athletes | Athletes list & management | Yes |
+| /coaches | Coaches list & management | Yes |
+| /classes | Class templates management | Yes |
+| /calendar | Schedule view | Yes |
+| /tickets | Support tickets | Yes |
+| /notifications | User notifications | Yes |
+| /settings | App settings | Yes |
+
+## 6. Features
+
+### Authentication
+- Email/password login via Supabase Auth
+- Session management with @supabase/ssr
+
+### Dashboard
+- Overview statistics
+- Quick access to recent activities
+
+### Athletes Management
+- List all athletes
+- Add/edit/delete athletes
+- Assign membership plans
+
+### Coaches Management
+- List all coaches
+- Add/edit/delete coaches
+- Assign specialties
+
+### Classes Management
+- Create class templates (name, description, duration)
+- Schedule classes
+- View calendar
+
+### Membership Plans
+- View available plans
+- Plan details with pricing
+
+### Tickets System
+- Athletes can create tickets
+- View ticket status
+
+### Notifications
+- In-app notification system
+- Mark as read/unread
+
+## 7. Known Limitations
+
+- Admin CRUD operations are UI-only, not connected to backend API
+- Create/update/delete only modify local state, not persisted to Supabase
+- Some pages may still be using placeholder/mock data
+
+## 8. Database
+
+- **Project ID:** gyxjkwzycglhfbmwxbac
+- **URL:** https://gyxjkwzycglhfbmwxbac.supabase.co
+- RLS (Row Level Security) enabled on all tables
