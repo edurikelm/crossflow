@@ -200,32 +200,34 @@ export default function CoachesPage() {
               <TableHead>Teléfono</TableHead>
               <TableHead>Especialidades</TableHead>
               <TableHead>Estado</TableHead>
+              <TableHead>Creado por</TableHead>
+              <TableHead>Fecha creación</TableHead>
               <TableHead className="w-[70px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : filteredCoaches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   No se encontraron coaches
                 </TableCell>
               </TableRow>
             ) : (
               filteredCoaches.map((coach) => {
-                const profile = coach.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+                const creatorProfile = coach.profile as { full_name?: string } | undefined;
                 return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
-                    {profile?.full_name || "Sin nombre"}
+                    {coach.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{profile?.email}</TableCell>
-                  <TableCell>{profile?.phone || "-"}</TableCell>
+                  <TableCell>{coach.email || "-"}</TableCell>
+                  <TableCell>{coach.phone || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {coach.specialty?.slice(0, 2).map((s) => (
@@ -244,6 +246,18 @@ export default function CoachesPage() {
                     <Badge variant={coach.is_active ? "success" : "secondary"}>
                       {coach.is_active ? "Activo" : "Inactivo"}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {(coach.profile as { full_name?: string })?.full_name || "-"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(coach.created_at).toLocaleDateString("es-AR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('coaches')
-    .select('*');
+    .select('*, profiles(full_name, email)');
 
   if (search) {
     query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
@@ -29,11 +29,28 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, gym_id')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
+    }
+
     const body = await request.json();
     const validated = coachSchema.parse(body);
 
     const insertData = {
       ...validated,
+      profile_id: profile.id,
+      gym_id: profile.gym_id,
       is_active: true,
     };
 
