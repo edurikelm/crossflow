@@ -62,6 +62,7 @@ export const classTemplateSchema = z.object({
   focus_area: z.array(z.string()).min(1, "Al menos un enfoque"),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color inválido"),
   sections: z.array(classSectionSchema).optional(),
+  gym_id: z.string().uuid("Gimnasio requerido"),
 });
 
 export const scheduledClassSchema = z.object({

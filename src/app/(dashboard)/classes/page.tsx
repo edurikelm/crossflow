@@ -33,6 +33,7 @@ import type { ClassTemplate } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { classTemplateSchema, type ClassTemplateInput } from "@/lib/validations";
+import { useAuthStore } from "@/store";
 
 const LEVEL_COLORS: Record<string, string> = {
   beginner: "bg-green-100 text-green-800",
@@ -50,7 +51,7 @@ export default function ClassesPage() {
   const [editingClass, setEditingClass] = useState<ClassTemplate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ClassTemplateInput>({
+  const { register, handleSubmit, reset, setValue, watch, getValues, formState: { errors } } = useForm<ClassTemplateInput>({
     resolver: zodResolver(classTemplateSchema),
     defaultValues: {
       name: "",
@@ -95,12 +96,21 @@ export default function ClassesPage() {
         });
         if (!res.ok) throw new Error("Failed to update class");
       } else {
+        const gymId = useAuthStore.getState().gymId;
+        if (!gymId) {
+          console.error("No gymId found in auth store");
+          setIsSubmitting(false);
+          return;
+        }
         const res = await fetch("/api/class_templates", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, gym_id: gymId }),
         });
-        if (!res.ok) throw new Error("Failed to create class");
+        const errorData = await res.json();
+        if (!res.ok) {
+          throw new Error(errorData.error || "Failed to create class");
+        }
       }
 
       setIsDialogOpen(false);
@@ -154,6 +164,48 @@ export default function ClassesPage() {
       ? current.filter((a) => a !== area)
       : [...current, area];
     setValue("focus_area", updated);
+  };
+
+  const handleSave = async () => {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    const data = getValues();
+    const gymId = useAuthStore.getState().gymId;
+
+    setIsSubmitting(true);
+    try {
+      if (editingClass) {
+        const res = await fetch(`/api/class_templates/${editingClass.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Failed to update class");
+        }
+      } else {
+        const res = await fetch("/api/class_templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, gym_id: gymId }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || err.details || "Failed to create class");
+        }
+      }
+      setIsDialogOpen(false);
+      setEditingClass(null);
+      reset();
+      fetchClasses();
+    } catch (error) {
+      console.error("Error saving class:", error);
+      alert("Error al guardar: " + (error as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -239,6 +291,12 @@ export default function ClassesPage() {
                     <span>{cls.capacity} cupos</span>
                   </div>
                 </div>
+
+                {(cls as unknown as { profiles?: { full_name?: string } })?.profiles && (
+                  <div className="text-xs text-muted-foreground">
+                    Creado por: {(cls as unknown as { profiles?: { full_name?: string } }).profiles?.full_name}
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <Button
@@ -399,7 +457,11 @@ export default function ClassesPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleSave}
+              >
                 {isSubmitting ? "Guardando..." : "Guardar"}
               </Button>
             </DialogFooter>

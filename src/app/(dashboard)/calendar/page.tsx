@@ -40,6 +40,7 @@ import {
 } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ScheduledClassWithDetails, ClassTemplate, CoachWithProfile } from "@/types";
+import { useAuthStore } from "@/store";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
 
@@ -71,19 +72,31 @@ export default function CalendarPage() {
     const startDate = format(addDays(ws, 0), "yyyy-MM-dd");
     const endDate = format(addDays(ws, 6), "yyyy-MM-dd");
 
-    const [classesRes, templatesRes, coachesRes] = await Promise.all([
-      supabase
-        .from("scheduled_classes")
-        .select(`
-          *,
-          class_templates (*),
-          profiles:coach_id (id, full_name)
-        `)
-        .gte("date", startDate)
-        .lte("date", endDate),
+    const gymId = useAuthStore.getState().gymId;
+
+    let classesQuery = supabase
+      .from("scheduled_classes")
+      .select(`
+        *,
+        class_templates (*),
+        profiles:coach_id (id, full_name)
+      `)
+      .gte("date", startDate)
+      .lte("date", endDate);
+
+    if (gymId) {
+      classesQuery = classesQuery.eq("gym_id", gymId);
+    }
+
+    const [classesRes, templatesRes] = await Promise.all([
+      classesQuery,
       supabase.from("class_templates").select("*").eq("is_active", true),
-      supabase.from("coaches").select("*, profile:profile_id (id, full_name)").eq("is_active", true),
     ]);
+
+    let coachesRes = { data: [] as CoachWithProfile[], error: null };
+    if (gymId) {
+      coachesRes = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", gymId);
+    }
 
     if (classesRes.data) {
       setScheduledClasses(classesRes.data.map(c => ({
@@ -132,14 +145,24 @@ export default function CalendarPage() {
     const template = classTemplates.find(t => t.id === formData.class_template_id);
     const endHour = parseInt(formData.start_time.split(":")[0]) + (template?.duration_minutes || 60) / 60;
 
-    await supabase.from("scheduled_classes").insert({
-      class_template_id: formData.class_template_id,
-      coach_id: formData.coach_id,
-      date: formData.date,
-      start_time: formData.start_time,
-      end_time: `${Math.floor(endHour).toString().padStart(2, "0")}:${((endHour % 1) * 60).toString().padStart(2, "0")}`,
-      capacity: formData.capacity,
+    const res = await fetch("/api/scheduled_classes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        class_template_id: formData.class_template_id,
+        coach_id: formData.coach_id,
+        date: formData.date,
+        start_time: formData.start_time,
+        end_time: `${Math.floor(endHour).toString().padStart(2, "0")}:${((endHour % 1) * 60).toString().padStart(2, "0")}`,
+        capacity: formData.capacity,
+      }),
     });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Error creating class:", errorData);
+      return;
+    }
 
     setIsDialogOpen(false);
     fetchData(currentWeek);

@@ -179,6 +179,7 @@ export interface ClassSection {
 export interface ClassTemplate {
   id: string;
   gym_id: string;
+  profile_id: string;
   name: string;
   description: string | null;
   duration_minutes: number;
@@ -195,6 +196,7 @@ export interface ScheduledClass {
   id: string;
   class_template_id: string | null;
   gym_id: string;
+  profile_id: string;
   coach_id: string | null;
   date: string;
   start_time: string;
