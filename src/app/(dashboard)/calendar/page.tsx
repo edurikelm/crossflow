@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -29,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronLeft, ChevronRight, Clock, Users } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -45,7 +44,7 @@ import type { ScheduledClassWithDetails, ClassTemplate, CoachWithProfile } from 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
 
 export default function CalendarPage() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [scheduledClasses, setScheduledClasses] = useState<ScheduledClassWithDetails[]>([]);
   const [classTemplates, setClassTemplates] = useState<ClassTemplate[]>([]);
@@ -63,13 +62,14 @@ export default function CalendarPage() {
     capacity: 20,
   });
 
-  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Monday
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const weekStart = useMemo(() => startOfWeek(currentWeek, { weekStartsOn: 1 }), [currentWeek]);
+  const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (week: Date) => {
     setIsLoading(true);
-    const startDate = format(weekDays[0], "yyyy-MM-dd");
-    const endDate = format(weekDays[6], "yyyy-MM-dd");
+    const ws = startOfWeek(week, { weekStartsOn: 1 });
+    const startDate = format(addDays(ws, 0), "yyyy-MM-dd");
+    const endDate = format(addDays(ws, 6), "yyyy-MM-dd");
 
     const [classesRes, templatesRes, coachesRes] = await Promise.all([
       supabase
@@ -94,12 +94,12 @@ export default function CalendarPage() {
     if (templatesRes.data) setClassTemplates(templatesRes.data);
     if (coachesRes.data) setCoaches(coachesRes.data);
     setIsLoading(false);
-  }, [weekDays]);
+  }, [supabase]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchData();
-  }, [fetchData]);
+    fetchData(currentWeek);
+  }, [currentWeek, fetchData]);
 
   const getClassesForDay = (day: Date) => {
     return scheduledClasses.filter((cls) =>
@@ -142,7 +142,7 @@ export default function CalendarPage() {
     });
 
     setIsDialogOpen(false);
-    fetchData();
+    fetchData(currentWeek);
   };
 
   return (
@@ -349,7 +349,7 @@ export default function CalendarPage() {
                 <SelectContent>
                   {coaches.map((coach) => (
                     <SelectItem key={coach.id} value={coach.id}>
-                      {coach.profile?.full_name || "Coach"}
+                      {coach.full_name || "Coach"}
                     </SelectItem>
                   ))}
                 </SelectContent>
