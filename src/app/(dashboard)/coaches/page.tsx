@@ -220,7 +220,6 @@ export default function CoachesPage() {
               </TableRow>
             ) : (
               filteredCoaches.map((coach) => {
-                const creatorProfile = coach.profile as { full_name?: string } | undefined;
                 return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
@@ -248,7 +247,7 @@ export default function CoachesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {(coach.profile as { full_name?: string })?.full_name || "-"}
+                    {(coach as unknown as { profiles?: { full_name?: string } })?.profiles?.full_name || "-"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(coach.created_at).toLocaleDateString("es-AR", {
