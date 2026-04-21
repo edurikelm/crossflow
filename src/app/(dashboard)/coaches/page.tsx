@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,11 +28,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, Search, Pencil, Trash2, UserCog } from "lucide-react";
+import { MoreHorizontal, Plus, Search, Pencil, Trash2 } from "lucide-react";
 import type { CoachWithProfile } from "@/types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { coachSchema, type CoachInput } from "@/lib/validations";
+
+const SPECIALTIES = ["crossfit", "weightlifting", "gymnastics", "cardio", "nutrition", "mobility"];
 
 export default function CoachesPage() {
-  const supabase = createClient();
   const [coaches, setCoaches] = useState<CoachWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,120 +44,79 @@ export default function CoachesPage() {
   const [editingCoach, setEditingCoach] = useState<CoachWithProfile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    specialty: [] as string[],
-    bio: "",
-    hourly_rate: "",
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CoachInput>({
+    resolver: zodResolver(coachSchema),
+    defaultValues: {
+      full_name: "",
+      email: "",
+      phone: "",
+      specialty: [],
+      bio: "",
+      hourly_rate: undefined,
+    },
   });
 
-  const fetchCoaches = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from("coaches")
-      .select(`
-        *,
-        profile:profile_id (*)
-      `)
-      .order("created_at", { ascending: false });
+  const specialtyValue = watch("specialty") || [];
 
-    if (data) {
-      setCoaches(data);
+  const fetchCoaches = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : "";
+      const res = await fetch(`/api/coaches${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCoaches(data);
+      }
+    } catch (error) {
+      console.error("Error fetching coaches:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
+  }, [searchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCoaches();
-  }, []);
+  }, [fetchCoaches]);
 
   const filteredCoaches = coaches.filter((coach) => {
+    const profile = coach.profile as { full_name?: string; email?: string } | undefined;
     return (
       !searchQuery ||
-      coach.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      coach.profile?.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
-  const handleOpenDialog = (coach?: CoachWithProfile) => {
-    if (coach) {
-      setEditingCoach(coach);
-      setFormData({
-        full_name: coach.profile?.full_name || "",
-        email: coach.profile?.email || "",
-        phone: coach.profile?.phone || "",
-        specialty: coach.specialty || [],
-        bio: coach.bio || "",
-        hourly_rate: coach.hourly_rate?.toString() || "",
-      });
-    } else {
-      setEditingCoach(null);
-      setFormData({
-        full_name: "",
-        email: "",
-        phone: "",
-        specialty: [],
-        bio: "",
-        hourly_rate: "",
-      });
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async () => {
+  const onSubmit = async (data: CoachInput) => {
     setIsSubmitting(true);
     try {
       if (editingCoach) {
-        await supabase
-          .from("profiles")
-          .update({
-            full_name: formData.full_name,
-            phone: formData.phone,
-          })
-          .eq("id", editingCoach.profile_id);
-
-        await supabase
-          .from("coaches")
-          .update({
-            specialty: formData.specialty,
-            bio: formData.bio,
-            hourly_rate: formData.hourly_rate
-              ? parseFloat(formData.hourly_rate)
-              : null,
-          })
-          .eq("id", editingCoach.id);
-      } else {
-        const { data: authData } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          password: Math.random().toString(36).slice(-8),
-          user_metadata: { full_name: formData.full_name, role: "coach" },
+        const res = await fetch(`/api/coaches/${editingCoach.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
         });
-
-        if (authData.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("gym_id")
-            .eq("id", authData.user.id)
-            .single();
-
-          if (profile) {
-            await supabase.from("coaches").insert({
-              profile_id: authData.user.id,
-              gym_id: profile.gym_id,
-              specialty: formData.specialty,
-              bio: formData.bio,
-              hourly_rate: formData.hourly_rate
-                ? parseFloat(formData.hourly_rate)
-                : null,
-            });
-          }
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("API Error:", errorData);
+          throw new Error("Failed to update coach");
+        }
+      } else {
+        const res = await fetch("/api/coaches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("API Error:", errorData);
+          throw new Error("Failed to create coach: " + (errorData.error || "Unknown error"));
         }
       }
 
+      reset();
       setIsDialogOpen(false);
+      setEditingCoach(null);
       fetchCoaches();
     } catch (error) {
       console.error("Error saving coach:", error);
@@ -163,14 +125,45 @@ export default function CoachesPage() {
     }
   };
 
+  const handleOpenDialog = (coach?: CoachWithProfile) => {
+    if (coach) {
+      setEditingCoach(coach);
+      const profile = coach.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+      reset({
+        full_name: profile?.full_name || "",
+        email: profile?.email || "",
+        phone: profile?.phone || "",
+        specialty: coach.specialty || [],
+        bio: coach.bio || "",
+        hourly_rate: coach.hourly_rate ?? undefined,
+      });
+    } else {
+      setEditingCoach(null);
+      reset({
+        full_name: "",
+        email: "",
+        phone: "",
+        specialty: [],
+        bio: "",
+        hourly_rate: undefined,
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
   const handleDelete = async (coach: CoachWithProfile) => {
     if (confirm("¿Estás seguro de eliminar este coach?")) {
-      await supabase.from("coaches").delete().eq("id", coach.id);
-      if (coach.profile_id) {
-        await supabase.auth.admin.deleteUser(coach.profile_id);
-      }
+      await fetch(`/api/coaches/${coach.id}`, { method: "DELETE" });
       fetchCoaches();
     }
+  };
+
+  const toggleSpecialty = (spec: string) => {
+    const current = specialtyValue;
+    const updated = current.includes(spec)
+      ? current.filter((s) => s !== spec)
+      : [...current, spec];
+    setValue("specialty", updated);
   };
 
   return (
@@ -224,13 +217,15 @@ export default function CoachesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredCoaches.map((coach) => (
+              filteredCoaches.map((coach) => {
+                const profile = coach.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+                return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
-                    {coach.profile?.full_name || "Sin nombre"}
+                    {profile?.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{coach.profile?.email}</TableCell>
-                  <TableCell>{coach.profile?.phone || "-"}</TableCell>
+                  <TableCell>{profile?.email}</TableCell>
+                  <TableCell>{profile?.phone || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {coach.specialty?.slice(0, 2).map((s) => (
@@ -273,7 +268,7 @@ export default function CoachesPage() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))
+              )})
             )}
           </TableBody>
         </Table>
@@ -291,31 +286,31 @@ export default function CoachesPage() {
                 : "Ingresa los datos del nuevo coach"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="full_name">Nombre completo</Label>
                 <Input
                   id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, full_name: e.target.value })
-                  }
+                  {...register("full_name")}
                   placeholder="Carlos García"
                 />
+                {errors.full_name && (
+                  <p className="text-sm text-destructive">{errors.full_name.message}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  {...register("email")}
                   placeholder="carlos@email.com"
                   disabled={!!editingCoach}
                 />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
               </div>
             </div>
 
@@ -324,10 +319,7 @@ export default function CoachesPage() {
                 <Label htmlFor="phone">Teléfono</Label>
                 <Input
                   id="phone"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  {...register("phone")}
                   placeholder="+54 11 1234 5678"
                 />
               </div>
@@ -336,10 +328,8 @@ export default function CoachesPage() {
                 <Input
                   id="hourly_rate"
                   type="number"
-                  value={formData.hourly_rate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hourly_rate: e.target.value })
-                  }
+                  step="0.01"
+                  {...register("hourly_rate", { valueAsNumber: true })}
                   placeholder="25.00"
                 />
               </div>
@@ -348,67 +338,44 @@ export default function CoachesPage() {
             <div className="space-y-2">
               <Label>Especialidades</Label>
               <div className="flex flex-wrap gap-2">
-                {["crossfit", "weightlifting", "gymnastics", "cardio", "nutrition", "mobility"].map(
-                  (spec) => (
-                    <Badge
-                      key={spec}
-                      variant={
-                        formData.specialty.includes(spec)
-                          ? "default"
-                          : "outline"
-                      }
-                      className="cursor-pointer"
-                      onClick={() => {
-                        if (formData.specialty.includes(spec)) {
-                          setFormData({
-                            ...formData,
-                            specialty: formData.specialty.filter(
-                              (s) => s !== spec
-                            ),
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            specialty: [...formData.specialty, spec],
-                          });
-                        }
-                      }}
-                    >
-                      {spec}
-                    </Badge>
-                  )
-                )}
+                {SPECIALTIES.map((spec) => (
+                  <Badge
+                    key={spec}
+                    variant={specialtyValue.includes(spec) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => toggleSpecialty(spec)}
+                  >
+                    {spec}
+                  </Badge>
+                ))}
               </div>
+              {errors.specialty && (
+                <p className="text-sm text-destructive">{errors.specialty.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="bio">Biografía</Label>
               <Input
                 id="bio"
-                value={formData.bio}
-                onChange={(e) =>
-                  setFormData({ ...formData, bio: e.target.value })
-                }
+                {...register("bio")}
                 placeholder="Breve descripción del coach..."
               />
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || !formData.full_name || !formData.email}
-            >
-              {isSubmitting ? "Guardando..." : "Guardar"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Guardando..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

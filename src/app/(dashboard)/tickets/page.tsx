@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,10 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Ticket, MessageSquare, Clock } from "lucide-react";
+import { Plus, Search, Ticket, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import type { TicketWithDetails, TicketPriority, TicketStatus } from "@/types";
+import type { TicketWithDetails, TicketPriority } from "@/types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ticketSchema, type TicketInput } from "@/lib/validations";
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: "bg-gray-100 text-gray-800",
@@ -51,7 +53,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TicketsPage() {
-  const supabase = createClient();
   const [tickets, setTickets] = useState<TicketWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,95 +61,90 @@ export default function TicketsPage() {
   const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketWithDetails | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [newTicket, setNewTicket] = useState({
-    subject: "",
-    description: "",
-    priority: "medium",
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<TicketInput>({
+    resolver: zodResolver(ticketSchema),
+    defaultValues: {
+      subject: "",
+      description: "",
+      priority: "medium",
+    },
   });
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setIsLoading(true);
-    let query = supabase
-      .from("tickets")
-      .select(`
-        *,
-        athlete:athlete_id (
-          profile:profile_id (full_name)
-        )
-      `)
-      .order("created_at", { ascending: false });
-
-    if (statusFilter !== "all") {
-      query = query.eq("status", statusFilter);
+    try {
+      const params = new URLSearchParams();
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      const res = await fetch(`/api/tickets${params.toString() ? `?${params}` : ""}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTickets(data);
+      }
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    const { data } = await query;
-    if (data) setTickets(data);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchTickets();
   }, [statusFilter]);
 
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
+
   const filteredTickets = tickets.filter((ticket) => {
+    const athlete = ticket.athlete as { profile?: { full_name?: string } } | undefined;
     return (
       !searchQuery ||
       ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.athlete?.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      athlete?.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
-  const handleCreateTicket = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !newTicket.subject || !newTicket.description) return;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("gym_id")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      await supabase.from("tickets").insert({
-        gym_id: profile.gym_id,
-        subject: newTicket.subject,
-        description: newTicket.description,
-        priority: newTicket.priority as TicketPriority,
+  const onSubmit = async (data: TicketInput) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-
-      setNewTicket({ subject: "", description: "", priority: "medium" });
-      setIsDialogOpen(false);
-      fetchTickets();
+      if (res.ok) {
+        reset();
+        setIsDialogOpen(false);
+        fetchTickets();
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleStatusChange = async (ticket: TicketWithDetails, newStatus: string) => {
-    await supabase
-      .from("tickets")
-      .update({ status: newStatus as TicketStatus })
-      .eq("id", ticket.id);
+    await fetch(`/api/tickets/${ticket.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
     fetchTickets();
   };
 
   const handleReply = async () => {
     if (!selectedTicket || !replyMessage) return;
 
-    await supabase.from("ticket_messages").insert({
-      ticket_id: selectedTicket.id,
-      sender_id: (await supabase.auth.getUser()).data.user?.id,
-      message: replyMessage,
+    await fetch(`/api/tickets/${selectedTicket.id}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: replyMessage }),
     });
 
-    await supabase
-      .from("tickets")
-      .update({
-        status: "in_progress",
-        response_count: selectedTicket.response_count + 1,
-      })
-      .eq("id", selectedTicket.id);
+    await fetch(`/api/tickets/${selectedTicket.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "in_progress" }),
+    });
 
     setReplyMessage("");
     setIsReplyDialogOpen(false);
@@ -216,7 +212,9 @@ export default function TicketsPage() {
                 No se encontraron tickets
               </TableCell>
             ) : (
-              filteredTickets.map((ticket) => (
+              filteredTickets.map((ticket) => {
+                const athlete = ticket.athlete as { profile?: { full_name?: string } } | undefined;
+                return (
                 <TableRow key={ticket.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -225,7 +223,7 @@ export default function TicketsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {ticket.athlete?.profile?.full_name || "Sistema"}
+                    {athlete?.profile?.full_name || "Sistema"}
                   </TableCell>
                   <TableCell>
                     <Badge className={PRIORITY_COLORS[ticket.priority]}>
@@ -262,7 +260,7 @@ export default function TicketsPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))
+              )})
             )}
           </TableBody>
         </Table>
@@ -277,54 +275,51 @@ export default function TicketsPage() {
               Crea un nuevo ticket de soporte
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label>Asunto</Label>
+              <Label htmlFor="subject">Asunto</Label>
               <Input
-                value={newTicket.subject}
-                onChange={(e) =>
-                  setNewTicket({ ...newTicket, subject: e.target.value })
-                }
+                id="subject"
+                {...register("subject")}
                 placeholder="No puedo reservar clase"
               />
+              {errors.subject && (
+                <p className="text-sm text-destructive">{errors.subject.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label>Descripción</Label>
+              <Label htmlFor="description">Descripción</Label>
               <Textarea
-                value={newTicket.description}
-                onChange={(e) =>
-                  setNewTicket({ ...newTicket, description: e.target.value })
-                }
+                id="description"
+                {...register("description")}
                 placeholder="Describe tu consulta..."
                 rows={4}
               />
+              {errors.description && (
+                <p className="text-sm text-destructive">{errors.description.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label>Prioridad</Label>
-              <Select
-                value={newTicket.priority}
-                onValueChange={(value) =>
-                  setNewTicket({ ...newTicket, priority: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Baja</SelectItem>
-                  <SelectItem value="medium">Media</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="priority">Prioridad</Label>
+              <select {...register("priority")} className="w-full p-2 border rounded">
+                <option value="low">Baja</option>
+                <option value="medium">Media</option>
+                <option value="high">Alta</option>
+                <option value="urgent">Urgente</option>
+              </select>
+              {errors.priority && (
+                <p className="text-sm text-destructive">{errors.priority.message}</p>
+              )}
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreateTicket}>Crear</Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creando..." : "Crear"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

@@ -21709,3 +21709,132 @@
 {"timestamp":"2026-04-21T15:42:15.365Z","level":"info","message":"✅ [940] Connection 3e8ddfd6-91fd-410c-80b8-3a9d1922eff5 fully established and proxying","context":{"tunnelVersion":"1"}}
 {"timestamp":"2026-04-21T15:42:17.374Z","level":"info","message":"🔚 [Proxy-915] Remote closed after 60312ms (transferred: 5050→4502 bytes)","context":{"tunnelVersion":"1"}}
 {"timestamp":"2026-04-21T15:42:17.397Z","level":"info","message":"🔚 [Proxy-915] Local closed after 60335ms (transferred: 5050→4502 bytes)","context":{"tunnelVersion":"1"}}
+{"timestamp":"2026-04-21T16:19:09.078Z","level":"debug","message":"Generate code and execute params","context":{"projectName":"crossflow","projectPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow","testIds":[],"serverMode":"development"}}
+{"timestamp":"2026-04-21T16:19:09.101Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:09.614Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:10.124Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:10.639Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:11.153Z","level":"info","message":"checkPortListening tcp failed, trying http fallback: 3000 localhost"}
+{"timestamp":"2026-04-21T16:19:11.175Z","level":"info","message":"Dev-mode test cap: selecting 15 of 25 frontend tests (serverMode=development)"}
+{"timestamp":"2026-04-21T16:19:11.162Z","level":"error","message":"checkPortListening failed (tcp + http): 3000 localhost"}
+{"timestamp":"2026-04-21T16:19:11.162Z","level":"error","message":"checkPortListening http check failed: http://localhost:3000/ TypeError: fetch failed"}
+{"timestamp":"2026-04-21T16:19:11.788Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:11.163Z","level":"info","message":"Attempting to start server (attempt 1/3)"}
+{"timestamp":"2026-04-21T16:19:11.165Z","level":"info","message":"HTTP server started successfully on port 60904"}
+{"timestamp":"2026-04-21T16:19:11.175Z","level":"info","message":"Skipped tests: TC016[Medium], TC017[Medium], TC018[Medium], TC019[Low], TC020[Low], TC021[Low], TC022[Low], TC023[Low], TC024[Low], TC025[Low]"}
+{"timestamp":"2026-04-21T16:19:11.175Z","level":"info","message":"Selected tests: TC001[High], TC002[High], TC003[High], TC004[High], TC005[High], TC006[High], TC007[High], TC008[Medium], TC009[Medium], TC010[Medium], TC011[Medium], TC012[Medium], TC013[Medium], TC014[Medium], TC015[Medium]"}
+{"timestamp":"2026-04-21T16:19:12.302Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:12.806Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:13.317Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:13.833Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:14.348Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:14.849Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:15.360Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:15.864Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:16.378Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:16.894Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:17.410Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:17.925Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:18.434Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:18.945Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:19:19.461Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:29.998Z","level":"debug","message":"Generate code and execute params","context":{"projectName":"crossflow","projectPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow","testIds":[],"serverMode":"development"}}
+{"timestamp":"2026-04-21T16:20:30.017Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:30.522Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:31.038Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:31.551Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:32.061Z","level":"info","message":"checkPortListening tcp failed, trying http fallback: 3000 localhost"}
+{"timestamp":"2026-04-21T16:20:32.078Z","level":"info","message":"Dev-mode test cap: selecting 15 of 25 frontend tests (serverMode=development)"}
+{"timestamp":"2026-04-21T16:20:32.069Z","level":"error","message":"checkPortListening http check failed: http://localhost:3000/ TypeError: fetch failed"}
+{"timestamp":"2026-04-21T16:20:32.071Z","level":"info","message":"HTTP server started successfully on port 63541"}
+{"timestamp":"2026-04-21T16:20:32.726Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:32.079Z","level":"info","message":"Skipped tests: TC016[Medium], TC017[Medium], TC018[Medium], TC019[Low], TC020[Low], TC021[Low], TC022[Low], TC023[Low], TC024[Low], TC025[Low]"}
+{"timestamp":"2026-04-21T16:20:32.078Z","level":"info","message":"Selected tests: TC001[High], TC002[High], TC003[High], TC004[High], TC005[High], TC006[High], TC007[High], TC008[Medium], TC009[Medium], TC010[Medium], TC011[Medium], TC012[Medium], TC013[Medium], TC014[Medium], TC015[Medium]"}
+{"timestamp":"2026-04-21T16:20:32.069Z","level":"info","message":"Attempting to start server (attempt 1/3)"}
+{"timestamp":"2026-04-21T16:20:32.069Z","level":"error","message":"checkPortListening failed (tcp + http): 3000 localhost"}
+{"timestamp":"2026-04-21T16:20:33.233Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:33.736Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:34.239Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:34.754Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:35.259Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:35.775Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:36.289Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:36.792Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:37.306Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:37.817Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:38.334Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:38.851Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:39.353Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:39.858Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:20:40.372Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:27:21.568Z","level":"info","message":"Tool invocation started","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:21.587Z","level":"info","message":"HTTP server started, config saved","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:21.570Z","level":"debug","message":"Initialization params","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap","context":{"localPort":3000,"type":"frontend","projectPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow","testScope":"codebase"}}
+{"timestamp":"2026-04-21T16:27:21.572Z","level":"info","message":"Attempting to start server (attempt 1/3)","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:22.290Z","level":"info","message":"GET /init?project_path=C%3A%5CUsers%5Ceduri%5COneDrive%5CDesktop%5Ccrossflow&default_type=frontend 200 5ms","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:21.585Z","level":"info","message":"HTTP server started successfully on port 62140","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:22.863Z","level":"info","message":"GET /api/config?project_path=C%3A%5CUsers%5Ceduri%5COneDrive%5CDesktop%5Ccrossflow 200 4ms","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:22.937Z","level":"info","message":"GET /favicon.ico 404 2ms","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:27.050Z","level":"info","message":"commit: {\"file\":\"[object Object]\",\"login_user\":\"admin@crossfit.com\",\"login_password\":\"Admin123!\",\"mode\":\"Frontend\",\"scope\":\"codebase\",\"port\":\"3000\"}","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:27.052Z","level":"info","message":"POST /api/commit?project_path=C%3A%5CUsers%5Ceduri%5COneDrive%5CDesktop%5Ccrossflow 200 8ms","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:27.621Z","level":"info","message":"Config committed by user","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:27.624Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:28.134Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:28.648Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:29.161Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:29.678Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:30.181Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:30.683Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:31.196Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:31.710Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:32.223Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:32.735Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:33.247Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:33.749Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:34.263Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:34.778Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:35.282Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:35.793Z","level":"info","message":"checkPortListening tcp failed, trying http fallback: 3000 localhost","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:35.801Z","level":"info","message":"Tool invocation completed","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:35.800Z","level":"error","message":"checkPortListening failed (tcp + http): 3000 localhost","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:35.799Z","level":"error","message":"checkPortListening http check failed: http://localhost:3000/ TypeError: fetch failed","correlationId":"bf692079-b9b0-4951-af93-c709793f664f","tool":"testsprite_bootstrap"}
+{"timestamp":"2026-04-21T16:27:39.428Z","level":"debug","message":"Code analyze params","correlationId":"005525ea-fef7-4e3c-944a-ab50121e158d","tool":"testsprite_generate_code_summary","context":{"projectRootPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow"}}
+{"timestamp":"2026-04-21T16:27:39.428Z","level":"info","message":"Scope determined","correlationId":"005525ea-fef7-4e3c-944a-ab50121e158d","tool":"testsprite_generate_code_summary","context":{"scope":"codebase","type":"frontend"}}
+{"timestamp":"2026-04-21T16:27:39.427Z","level":"info","message":"Tool invocation started","correlationId":"005525ea-fef7-4e3c-944a-ab50121e158d","tool":"testsprite_generate_code_summary"}
+{"timestamp":"2026-04-21T16:27:39.429Z","level":"info","message":"Tool invocation completed","correlationId":"005525ea-fef7-4e3c-944a-ab50121e158d","tool":"testsprite_generate_code_summary"}
+{"timestamp":"2026-04-21T16:29:27.085Z","level":"debug","message":"Generate frontend test plan params","correlationId":"ac6d1144-3dc9-4f2d-b28f-e0cffb5292d8","tool":"testsprite_generate_frontend_test_plan","context":{"projectPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow","needLogin":true}}
+{"timestamp":"2026-04-21T16:29:27.084Z","level":"info","message":"Tool invocation started","correlationId":"ac6d1144-3dc9-4f2d-b28f-e0cffb5292d8","tool":"testsprite_generate_frontend_test_plan"}
+{"timestamp":"2026-04-21T16:30:05.812Z","level":"info","message":"Tool invocation completed","correlationId":"ac6d1144-3dc9-4f2d-b28f-e0cffb5292d8","tool":"testsprite_generate_frontend_test_plan"}
+{"timestamp":"2026-04-21T16:30:10.007Z","level":"info","message":"Tool invocation started","correlationId":"a5cc5991-e9e4-483d-9abf-d6c1541f5e76","tool":"testsprite_generate_code_and_execute"}
+{"timestamp":"2026-04-21T16:30:10.011Z","level":"info","message":"Tool invocation completed","correlationId":"a5cc5991-e9e4-483d-9abf-d6c1541f5e76","tool":"testsprite_generate_code_and_execute"}
+{"timestamp":"2026-04-21T16:30:25.830Z","level":"info","message":"Tool invocation started","correlationId":"2b306ade-c7ba-49c6-b3c7-90a7775b2991","tool":"testsprite_generate_code_and_execute"}
+{"timestamp":"2026-04-21T16:30:25.833Z","level":"info","message":"Tool invocation completed","correlationId":"2b306ade-c7ba-49c6-b3c7-90a7775b2991","tool":"testsprite_generate_code_and_execute"}
+{"timestamp":"2026-04-21T16:30:41.334Z","level":"debug","message":"Generate code and execute params","context":{"projectName":"crossflow","projectPath":"C:\\Users\\eduri\\OneDrive\\Desktop\\crossflow","testIds":[],"serverMode":"production"}}
+{"timestamp":"2026-04-21T16:30:41.357Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:41.870Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:42.387Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:42.904Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:43.419Z","level":"info","message":"checkPortListening tcp failed, trying http fallback: 3000 localhost"}
+{"timestamp":"2026-04-21T16:30:43.439Z","level":"info","message":"Prod-mode test cap: selecting 30 of 34 frontend tests (serverMode=production)"}
+{"timestamp":"2026-04-21T16:30:43.431Z","level":"info","message":"HTTP server started successfully on port 62336"}
+{"timestamp":"2026-04-21T16:30:43.427Z","level":"error","message":"checkPortListening http check failed: http://localhost:3000/ TypeError: fetch failed"}
+{"timestamp":"2026-04-21T16:30:44.083Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:43.428Z","level":"error","message":"checkPortListening failed (tcp + http): 3000 localhost"}
+{"timestamp":"2026-04-21T16:30:43.440Z","level":"info","message":"Selected tests: TC001[High], TC002[High], TC003[High], TC004[High], TC005[High], TC006[High], TC007[High], TC008[High], TC009[High], TC010[High], TC011[Medium], TC012[Medium], TC013[Medium], TC014[Medium], TC015[Medium], TC016[Medium], TC017[Medium], TC018[Medium], TC019[Medium], TC020[Medium], TC021[Medium], TC022[Low], TC023[Low], TC024[Low], TC025[Low], TC026[Low], TC027[Low], TC028[Low], TC029[Low], TC030[Low]"}
+{"timestamp":"2026-04-21T16:30:43.428Z","level":"info","message":"Attempting to start server (attempt 1/3)"}
+{"timestamp":"2026-04-21T16:30:43.440Z","level":"info","message":"Skipped tests: TC031[Low], TC032[Low], TC033[Low], TC034[Low]"}
+{"timestamp":"2026-04-21T16:30:44.601Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:45.111Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:45.623Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:46.134Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:46.650Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:47.162Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:47.675Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:48.191Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:48.704Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:49.205Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:49.719Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:50.231Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:50.744Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:51.260Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}
+{"timestamp":"2026-04-21T16:30:51.762Z","level":"error","message":"checkPortListening tcp error: 3000 localhost\nAggregateError"}

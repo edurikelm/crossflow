@@ -49,19 +49,18 @@ export const classSectionSchema = z.object({
 });
 
 export const classTemplateSchema = z.object({
-  name: z.string().min(2, "Nombre requerido"),
+  name: z.string().min(1, "Nombre requerido"),
   description: z.string().optional(),
   duration_minutes: z
     .number()
     .int()
     .positive()
     .min(15)
-    .max(180)
-    .default(60),
-  capacity: z.number().int().positive().max(100).default(20),
-  level: z.enum(["beginner", "intermediate", "advanced", "all_levels"]).default("all_levels"),
+    .max(180),
+  capacity: z.number().int().positive().max(100),
+  level: z.enum(["beginner", "intermediate", "advanced", "all_levels"]),
   focus_area: z.array(z.string()).min(1, "Al menos un enfoque"),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color inválido").default("#3B82F6"),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color inválido"),
   sections: z.array(classSectionSchema).optional(),
 });
 
@@ -88,7 +87,7 @@ export const coachSchema = z.object({
   phone: z.string().optional(),
   specialty: z.array(z.string()).optional(),
   bio: z.string().optional(),
-  hourly_rate: z.number().positive().optional(),
+  hourly_rate: z.number().positive().optional().nullable(),
   contract_start: z.string().optional(),
 });
 
@@ -116,7 +115,7 @@ export type MembershipPlanInput = z.infer<typeof membershipPlanSchema>;
 export const ticketSchema = z.object({
   subject: z.string().min(5).max(200),
   description: z.string().min(10),
-  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
 });
 
 export const ticketResponseSchema = z.object({

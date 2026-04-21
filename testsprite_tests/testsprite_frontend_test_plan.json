@@ -1,8 +1,8 @@
 [
   {
     "id": "TC001",
-    "title": "Sign in to access the dashboard",
-    "description": "Verifies a staff user can log in with valid credentials and lands on the dashboard successfully.",
+    "title": "Sign in and reach the dashboard",
+    "description": "Verifies a user can sign in with valid credentials and lands on the dashboard successfully.",
     "category": "User Login",
     "steps": [
       {
@@ -30,70 +30,25 @@
   },
   {
     "id": "TC002",
-    "title": "Access dashboard after signing in",
-    "description": "Verifies that a staff user can sign in and reach the dashboard successfully.",
-    "category": "Calendar View",
+    "title": "Redirect unauthenticated user away from protected dashboard home",
+    "description": "Verifies an unauthenticated user cannot access the dashboard home and is redirected or blocked.",
+    "category": "Dashboard",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
+        "description": "Navigate to /"
       },
       {
         "type": "assertion",
-        "description": "Verify the user lands on the dashboard"
+        "description": "Verify the user is redirected to the login page or a blocked-access view is shown"
       }
     ],
     "priority": "High"
   },
   {
     "id": "TC003",
-    "title": "Navigate from dashboard to Athletes via sidebar",
-    "description": "Verifies a logged-in user can reach Athletes management from the dashboard using the primary navigation.",
-    "category": "Dashboard",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill {{LOGIN_USER}} into the email field"
-      },
-      {
-        "type": "action",
-        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Use the sidebar to open the Athletes area"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the Athletes management page is displayed"
-      }
-    ],
-    "priority": "High"
-  },
-  {
-    "id": "TC004",
     "title": "Create a new athlete and see it in the list",
-    "description": "Verifies a staff user can add a new athlete and the athlete appears in the athletes list in the current session.",
+    "description": "Verifies a user can add a new athlete via the form and the athlete appears in the current-session list.",
     "category": "Athletes Management",
     "steps": [
       {
@@ -114,7 +69,7 @@
       },
       {
         "type": "action",
-        "description": "Use the sidebar to open the Athletes area"
+        "description": "Use the sidebar to navigate to the athletes section"
       },
       {
         "type": "action",
@@ -122,7 +77,11 @@
       },
       {
         "type": "action",
-        "description": "Fill Test Athlete Alpha into the athlete name field"
+        "description": "Fill Test Athlete A into the athlete name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill valid values into any other required athlete fields"
       },
       {
         "type": "action",
@@ -136,9 +95,9 @@
     "priority": "High"
   },
   {
-    "id": "TC005",
-    "title": "Create, edit, and delete a coach from the list",
-    "description": "Verifies that a staff user can add a coach, update that coach, and remove the coach from the list in the same session.",
+    "id": "TC004",
+    "title": "Create a coach from the coaches list",
+    "description": "Verifies a staff user can add a new coach and the coach appears in the coaches list within the current session.",
     "category": "Coaches Management",
     "steps": [
       {
@@ -147,11 +106,11 @@
       },
       {
         "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
+        "description": "Fill {{LOGIN_USER}} into the email field"
       },
       {
         "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
       },
       {
         "type": "action",
@@ -159,7 +118,7 @@
       },
       {
         "type": "action",
-        "description": "Click the sidebar link to manage coaches"
+        "description": "Click the sidebar link to coaches"
       },
       {
         "type": "action",
@@ -167,48 +126,28 @@
       },
       {
         "type": "action",
-        "description": "Fill a valid name into the coach name field"
+        "description": "Fill a valid coach name into the name field"
       },
       {
         "type": "action",
-        "description": "Fill a valid email into the coach email field"
+        "description": "Fill a valid coach contact value into the contact field"
       },
       {
         "type": "action",
-        "description": "Submit the new coach"
-      },
-      {
-        "type": "action",
-        "description": "Open the newly created coach for editing"
-      },
-      {
-        "type": "action",
-        "description": "Update the coach name field with a different valid name"
-      },
-      {
-        "type": "action",
-        "description": "Save the coach changes"
-      },
-      {
-        "type": "action",
-        "description": "Select the edited coach for deletion"
-      },
-      {
-        "type": "action",
-        "description": "Confirm the deletion"
+        "description": "Submit the coach form"
       },
       {
         "type": "assertion",
-        "description": "Verify the deleted coach no longer appears in the coaches list"
+        "description": "Verify the new coach appears in the coaches list"
       }
     ],
     "priority": "High"
   },
   {
-    "id": "TC006",
-    "title": "Create, edit, and delete a class template from the list",
-    "description": "Verifies that a staff user can create a class template, modify its details, and delete it from the templates list.",
-    "category": "Classes Management",
+    "id": "TC005",
+    "title": "Create a support ticket from the tickets page",
+    "description": "User can create a new support ticket and it appears in the tickets list with an initial status.",
+    "category": "Tickets System",
     "steps": [
       {
         "type": "action",
@@ -228,59 +167,35 @@
       },
       {
         "type": "action",
-        "description": "Click the sidebar link to manage class templates"
+        "description": "Click the navigation item for tickets"
       },
       {
         "type": "action",
-        "description": "Start creating a new class template"
+        "description": "Start creating a new ticket"
       },
       {
         "type": "action",
-        "description": "Fill a valid class name into the class name field"
+        "description": "Fill a unique subject into the ticket subject field"
       },
       {
         "type": "action",
-        "description": "Select a valid duration for the class"
+        "description": "Fill details into the ticket description field"
       },
       {
         "type": "action",
-        "description": "Fill a short description into the class description field"
-      },
-      {
-        "type": "action",
-        "description": "Submit the new class template"
-      },
-      {
-        "type": "action",
-        "description": "Open the newly created class template for editing"
-      },
-      {
-        "type": "action",
-        "description": "Update the class description field with different text"
-      },
-      {
-        "type": "action",
-        "description": "Save the class template changes"
-      },
-      {
-        "type": "action",
-        "description": "Select the edited class template for deletion"
-      },
-      {
-        "type": "action",
-        "description": "Confirm the deletion"
+        "description": "Submit the ticket"
       },
       {
         "type": "assertion",
-        "description": "Verify the deleted class template no longer appears in the class templates list"
+        "description": "Verify the newly created ticket is displayed in the tickets list with a status indicator"
       }
     ],
     "priority": "High"
   },
   {
-    "id": "TC007",
-    "title": "Navigate from dashboard to Classes via sidebar",
-    "description": "Verifies a logged-in user can reach Class templates from the dashboard using the primary navigation.",
+    "id": "TC006",
+    "title": "Navigate from dashboard to athletes via sidebar without losing session",
+    "description": "Verifies a signed-in user can navigate from the dashboard to Athletes using the sidebar and remains authenticated.",
     "category": "Dashboard",
     "steps": [
       {
@@ -301,11 +216,64 @@
       },
       {
         "type": "action",
-        "description": "Use the sidebar to open the Classes area"
+        "description": "Use the sidebar to navigate to the athletes section"
       },
       {
         "type": "assertion",
-        "description": "Verify the Class templates management page is displayed"
+        "description": "Verify the athletes management view is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Create a class template from the class templates list",
+    "description": "Verifies a staff user can create a class template and it appears in the templates list within the current session.",
+    "category": "Classes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to class templates"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new class template"
+      },
+      {
+        "type": "action",
+        "description": "Fill Strength 45 into the class name field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid duration value"
+      },
+      {
+        "type": "action",
+        "description": "Fill a short class description into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the class template form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new class template appears in the templates list"
       }
     ],
     "priority": "High"
@@ -313,7 +281,7 @@
   {
     "id": "TC008",
     "title": "Edit an existing athlete and see updated details in the list",
-    "description": "Verifies a staff user can edit an athlete and the updated athlete details are shown in the athletes list.",
+    "description": "Verifies a user can edit an athlete created in the session and the list reflects the updated details.",
     "category": "Athletes Management",
     "steps": [
       {
@@ -334,7 +302,7 @@
       },
       {
         "type": "action",
-        "description": "Use the sidebar to open the Athletes area"
+        "description": "Use the sidebar to navigate to the athletes section"
       },
       {
         "type": "action",
@@ -342,7 +310,11 @@
       },
       {
         "type": "action",
-        "description": "Fill Test Athlete Beta into the athlete name field"
+        "description": "Fill Test Athlete B into the athlete name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill valid values into any other required athlete fields"
       },
       {
         "type": "action",
@@ -350,11 +322,11 @@
       },
       {
         "type": "action",
-        "description": "Open the athlete record for Test Athlete Beta to edit"
+        "description": "Select the athlete named Test Athlete B to edit"
       },
       {
         "type": "action",
-        "description": "Fill Test Athlete Beta Updated into the athlete name field"
+        "description": "Update the athlete name to Test Athlete B Updated"
       },
       {
         "type": "action",
@@ -362,16 +334,16 @@
       },
       {
         "type": "assertion",
-        "description": "Verify the athletes list shows Test Athlete Beta Updated"
+        "description": "Verify the athletes list shows the updated athlete details"
       }
     ],
-    "priority": "Medium"
+    "priority": "High"
   },
   {
     "id": "TC009",
-    "title": "Inspect scheduled classes while navigating between dates",
-    "description": "Verifies that a staff user can move between calendar dates and see the scheduled classes update for the selected date.",
-    "category": "Calendar View",
+    "title": "Edit an existing coach from the coaches list",
+    "description": "Verifies a staff user can edit a coach and the updated coach details are shown in the coaches list within the current session.",
+    "category": "Coaches Management",
     "steps": [
       {
         "type": "action",
@@ -379,11 +351,11 @@
       },
       {
         "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
+        "description": "Fill {{LOGIN_USER}} into the email field"
       },
       {
         "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
       },
       {
         "type": "action",
@@ -391,23 +363,263 @@
       },
       {
         "type": "action",
-        "description": "Click the sidebar link to open the calendar"
+        "description": "Click the sidebar link to coaches"
       },
       {
         "type": "action",
-        "description": "Navigate to a different date in the calendar"
+        "description": "Start adding a new coach"
+      },
+      {
+        "type": "action",
+        "description": "Fill Coach Alpha into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid coach contact value into the contact field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the coach form"
+      },
+      {
+        "type": "action",
+        "description": "Select the coach record to edit"
+      },
+      {
+        "type": "action",
+        "description": "Fill Coach Alpha Updated into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Save the coach changes"
       },
       {
         "type": "assertion",
-        "description": "Verify scheduled classes are displayed for the selected date"
+        "description": "Verify the coaches list shows the updated coach name"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Edit an existing class template from the templates list",
+    "description": "Verifies a staff user can edit a class template and the updated template details are shown in the templates list within the current session.",
+    "category": "Classes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to class templates"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new class template"
+      },
+      {
+        "type": "action",
+        "description": "Fill Conditioning 30 into the class name field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid duration value"
+      },
+      {
+        "type": "action",
+        "description": "Fill a short class description into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the class template form"
+      },
+      {
+        "type": "action",
+        "description": "Select the class template to edit"
+      },
+      {
+        "type": "action",
+        "description": "Fill Conditioning 30 Updated into the class name field"
+      },
+      {
+        "type": "action",
+        "description": "Save the class template changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the templates list shows the updated class template name"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Navigate from dashboard to classes via sidebar",
+    "description": "Verifies a signed-in user can navigate from the dashboard to Class Templates using the sidebar.",
+    "category": "Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Use the sidebar to navigate to the class templates section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the class templates management view is displayed"
       }
     ],
     "priority": "Medium"
   },
   {
-    "id": "TC010",
-    "title": "Create a support ticket from the tickets area",
-    "description": "User creates a new support ticket and it appears in the tickets list with a visible status indicator.",
+    "id": "TC012",
+    "title": "Delete a coach from the coaches list",
+    "description": "Verifies a staff user can delete a coach and the coach is removed from the coaches list within the current session.",
+    "category": "Coaches Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to coaches"
+      },
+      {
+        "type": "action",
+        "description": "Start adding a new coach"
+      },
+      {
+        "type": "action",
+        "description": "Fill Coach To Delete into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid coach contact value into the contact field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the coach form"
+      },
+      {
+        "type": "action",
+        "description": "Select the coach record to delete"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deleted coach no longer appears in the coaches list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC013",
+    "title": "Delete a class template from the templates list",
+    "description": "Verifies a staff user can delete a class template and it is removed from the templates list within the current session.",
+    "category": "Classes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to class templates"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new class template"
+      },
+      {
+        "type": "action",
+        "description": "Fill Template To Delete into the class name field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid duration value"
+      },
+      {
+        "type": "action",
+        "description": "Fill a short class description into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the class template form"
+      },
+      {
+        "type": "action",
+        "description": "Select the class template to delete"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deleted class template no longer appears in the templates list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC014",
+    "title": "View a ticket’s status from its details view",
+    "description": "User can open a ticket from the list and see its current status in the ticket details view.",
     "category": "Tickets System",
     "steps": [
       {
@@ -428,7 +640,7 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the tickets area"
+        "description": "Click the navigation item for tickets"
       },
       {
         "type": "action",
@@ -436,27 +648,31 @@
       },
       {
         "type": "action",
-        "description": "Fill a subject into the ticket subject field"
+        "description": "Fill a unique subject into the ticket subject field"
       },
       {
         "type": "action",
-        "description": "Fill a description into the ticket description field"
+        "description": "Fill details into the ticket description field"
       },
       {
         "type": "action",
-        "description": "Submit the ticket form"
+        "description": "Submit the ticket"
+      },
+      {
+        "type": "action",
+        "description": "Open the newly created ticket from the list"
       },
       {
         "type": "assertion",
-        "description": "Verify the newly created ticket is displayed in the tickets list with a visible status"
+        "description": "Verify the ticket details view shows a status for the ticket"
       }
     ],
     "priority": "Medium"
   },
   {
-    "id": "TC011",
-    "title": "Delete an athlete and confirm it is removed from the list",
-    "description": "Verifies a staff user can delete an athlete and the athlete no longer appears in the athletes list.",
+    "id": "TC015",
+    "title": "Delete an athlete and remove it from the list",
+    "description": "Verifies a user can delete an athlete created in the session and the athlete is removed from the list.",
     "category": "Athletes Management",
     "steps": [
       {
@@ -477,7 +693,7 @@
       },
       {
         "type": "action",
-        "description": "Use the sidebar to open the Athletes area"
+        "description": "Use the sidebar to navigate to the athletes section"
       },
       {
         "type": "action",
@@ -485,7 +701,11 @@
       },
       {
         "type": "action",
-        "description": "Fill Test Athlete Gamma into the athlete name field"
+        "description": "Fill Test Athlete C into the athlete name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill valid values into any other required athlete fields"
       },
       {
         "type": "action",
@@ -493,7 +713,7 @@
       },
       {
         "type": "action",
-        "description": "Select the athlete record for Test Athlete Gamma to delete"
+        "description": "Select the athlete named Test Athlete C to delete"
       },
       {
         "type": "action",
@@ -501,15 +721,52 @@
       },
       {
         "type": "assertion",
-        "description": "Verify Test Athlete Gamma is not shown in the athletes list"
+        "description": "Verify the athlete no longer appears in the athletes list"
       }
     ],
     "priority": "Medium"
   },
   {
-    "id": "TC012",
-    "title": "Switch to week view and inspect classes across the week",
-    "description": "Verifies that a staff user can switch the calendar to a week view and see scheduled classes represented across the week range.",
+    "id": "TC016",
+    "title": "Mark a notification as read from the notifications list",
+    "description": "User can mark a notification as read and the list reflects the updated read state.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for notifications"
+      },
+      {
+        "type": "action",
+        "description": "Mark a notification as read from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification is shown as read in the notifications list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Inspect classes on different dates in the calendar",
+    "description": "Verifies a coach can navigate between calendar dates and inspect scheduled classes on the selected date without UI instability.",
     "category": "Calendar View",
     "steps": [
       {
@@ -518,48 +775,11 @@
       },
       {
         "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
+        "description": "Fill {{LOGIN_USER}} into the email field"
       },
       {
         "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the sidebar link to open the calendar"
-      },
-      {
-        "type": "action",
-        "description": "Switch the calendar to a week view"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify scheduled classes are displayed across the visible week range"
-      }
-    ],
-    "priority": "Medium"
-  },
-  {
-    "id": "TC013",
-    "title": "Open a ticket to view its status and details",
-    "description": "User selects a ticket from the list and sees the ticket details view showing its status information.",
-    "category": "Tickets System",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
       },
       {
         "type": "action",
@@ -567,39 +787,31 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the tickets area"
+        "description": "Click the sidebar link to calendar"
       },
       {
         "type": "action",
-        "description": "Start creating a new ticket"
+        "description": "Navigate to a different date in the calendar"
       },
       {
         "type": "action",
-        "description": "Fill a subject into the ticket subject field"
-      },
-      {
-        "type": "action",
-        "description": "Fill a description into the ticket description field"
-      },
-      {
-        "type": "action",
-        "description": "Submit the ticket form"
-      },
-      {
-        "type": "action",
-        "description": "Open the newly created ticket from the tickets list"
+        "description": "Open a scheduled class instance for the selected date"
       },
       {
         "type": "assertion",
-        "description": "Verify the ticket details view is displayed and includes a visible ticket status"
+        "description": "Verify class instance details are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the calendar still shows scheduled classes for the selected date"
       }
     ],
     "priority": "Medium"
   },
   {
-    "id": "TC014",
-    "title": "View settings and save an updated preference",
-    "description": "User changes a setting preference, saves, and the updated setting is reflected in the UI.",
+    "id": "TC018",
+    "title": "Save updated settings and see them reflected",
+    "description": "User can modify a setting, save changes, and see the updated value reflected in the settings UI.",
     "category": "Settings",
     "steps": [
       {
@@ -620,27 +832,68 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the settings area"
+        "description": "Click the navigation item for settings"
       },
       {
         "type": "action",
-        "description": "Modify a settings option to a different valid value"
+        "description": "Modify a settings option to a different value"
       },
       {
         "type": "action",
-        "description": "Save the settings changes"
+        "description": "Save settings changes"
       },
       {
         "type": "assertion",
-        "description": "Verify a saved confirmation or updated setting state is visible"
+        "description": "Verify the updated setting value is reflected in the settings UI"
       }
     ],
     "priority": "Medium"
   },
   {
-    "id": "TC015",
-    "title": "View notifications list",
-    "description": "User navigates to notifications and sees a list or an empty state rendered successfully.",
+    "id": "TC019",
+    "title": "View and inspect scheduled classes in week view",
+    "description": "Verifies a coach can switch to week view and inspect scheduled classes across the displayed week.",
+    "category": "Calendar View",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to calendar"
+      },
+      {
+        "type": "action",
+        "description": "Switch the calendar to week view"
+      },
+      {
+        "type": "action",
+        "description": "Open a scheduled class instance within the displayed week"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify class instance details are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC020",
+    "title": "Open a notification to read details and return to the list",
+    "description": "User can open a notification to view its details and return to the notifications list without losing the list context.",
     "category": "Notifications",
     "steps": [
       {
@@ -661,77 +914,7 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the notifications area"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify notifications are displayed or an empty state is visible"
-      }
-    ],
-    "priority": "Medium"
-  },
-  {
-    "id": "TC016",
-    "title": "Mark a notification as read",
-    "description": "User marks a notification as read and the notification shows a read state in the list.",
-    "category": "Notifications",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the navigation link to the notifications area"
-      },
-      {
-        "type": "action",
-        "description": "Mark a notification as read"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the notification is displayed with a read state"
-      }
-    ],
-    "priority": "Medium"
-  },
-  {
-    "id": "TC017",
-    "title": "Open a notification to read its details and return to list",
-    "description": "User opens a notification to view its details and can return to the notifications list.",
-    "category": "Notifications",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the navigation link to the notifications area"
+        "description": "Click the navigation item for notifications"
       },
       {
         "type": "action",
@@ -749,115 +932,9 @@
     "priority": "Medium"
   },
   {
-    "id": "TC018",
-    "title": "Persist visible settings changes after navigating away and back",
-    "description": "User saves a settings change, navigates away, returns to settings, and sees the updated setting still reflected in the UI.",
-    "category": "Settings",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the navigation link to the settings area"
-      },
-      {
-        "type": "action",
-        "description": "Modify a settings option to a different valid value"
-      },
-      {
-        "type": "action",
-        "description": "Save the settings changes"
-      },
-      {
-        "type": "action",
-        "description": "Click the navigation link to the dashboard home"
-      },
-      {
-        "type": "action",
-        "description": "Click the navigation link to the settings area"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the previously saved setting change is still reflected in the settings UI"
-      }
-    ],
-    "priority": "Medium"
-  },
-  {
-    "id": "TC019",
-    "title": "Cancel coach deletion keeps coach in the list",
-    "description": "Verifies that canceling a coach deletion leaves the coach record available in the list.",
-    "category": "Coaches Management",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the sidebar link to manage coaches"
-      },
-      {
-        "type": "action",
-        "description": "Start adding a new coach"
-      },
-      {
-        "type": "action",
-        "description": "Fill a valid name into the coach name field"
-      },
-      {
-        "type": "action",
-        "description": "Fill a valid email into the coach email field"
-      },
-      {
-        "type": "action",
-        "description": "Submit the new coach"
-      },
-      {
-        "type": "action",
-        "description": "Select the newly created coach for deletion"
-      },
-      {
-        "type": "action",
-        "description": "Cancel the deletion confirmation"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the coach still appears in the coaches list"
-      }
-    ],
-    "priority": "Low"
-  },
-  {
-    "id": "TC020",
-    "title": "Prevent ticket creation when required fields are missing",
-    "description": "User attempts to submit a new ticket with missing required information and sees validation errors without a ticket being created.",
+    "id": "TC021",
+    "title": "Creating a second ticket adds another row without removing the first",
+    "description": "User can create multiple tickets and the list reflects multiple entries within the same session.",
     "category": "Tickets System",
     "steps": [
       {
@@ -878,7 +955,7 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the tickets area"
+        "description": "Click the navigation item for tickets"
       },
       {
         "type": "action",
@@ -886,142 +963,43 @@
       },
       {
         "type": "action",
-        "description": "Submit the ticket form"
+        "description": "Fill a unique subject into the ticket subject field"
+      },
+      {
+        "type": "action",
+        "description": "Fill details into the ticket description field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the ticket"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new ticket"
+      },
+      {
+        "type": "action",
+        "description": "Fill a different unique subject into the ticket subject field"
+      },
+      {
+        "type": "action",
+        "description": "Fill different details into the ticket description field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the ticket"
       },
       {
         "type": "assertion",
-        "description": "Verify a form validation error is visible for the required ticket fields"
+        "description": "Verify the tickets list shows multiple ticket entries"
       }
     ],
-    "priority": "Low"
-  },
-  {
-    "id": "TC021",
-    "title": "Show validation errors when creating an athlete with missing required fields",
-    "description": "Verifies the add athlete form prevents submission and shows validation errors when required fields are empty.",
-    "category": "Athletes Management",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill {{LOGIN_USER}} into the email field"
-      },
-      {
-        "type": "action",
-        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Use the sidebar to open the Athletes area"
-      },
-      {
-        "type": "action",
-        "description": "Start adding a new athlete"
-      },
-      {
-        "type": "action",
-        "description": "Submit the new athlete form without filling required fields"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify required field validation errors are displayed"
-      }
-    ],
-    "priority": "Low"
+    "priority": "Medium"
   },
   {
     "id": "TC022",
-    "title": "Class template form validation prevents submission with missing required fields",
-    "description": "Verifies that class template creation blocks submission and shows validation errors when required fields are missing.",
-    "category": "Classes Management",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the sidebar link to manage class templates"
-      },
-      {
-        "type": "action",
-        "description": "Start creating a new class template"
-      },
-      {
-        "type": "action",
-        "description": "Submit the class template form without filling required fields"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify required-field validation errors are visible"
-      }
-    ],
-    "priority": "Low"
-  },
-  {
-    "id": "TC023",
-    "title": "Coach form validation prevents submission with missing required fields",
-    "description": "Verifies that the coach creation form blocks submission and shows validation errors when required fields are missing.",
-    "category": "Coaches Management",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate to /login"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the email field with {{LOGIN_USER}}"
-      },
-      {
-        "type": "action",
-        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
-      },
-      {
-        "type": "action",
-        "description": "Submit the login form"
-      },
-      {
-        "type": "action",
-        "description": "Click the sidebar link to manage coaches"
-      },
-      {
-        "type": "action",
-        "description": "Start adding a new coach"
-      },
-      {
-        "type": "action",
-        "description": "Submit the new coach form without filling required fields"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify required-field validation errors are visible"
-      }
-    ],
-    "priority": "Low"
-  },
-  {
-    "id": "TC024",
-    "title": "Prevent saving settings when required inputs are invalid",
-    "description": "User attempts to save settings with invalid or missing required inputs and sees validation errors without saving changes.",
+    "title": "Settings changes persist in UI after navigating away and back within session",
+    "description": "After saving settings, the user can navigate away and return to settings and still see the updated values within the same session.",
     "category": "Settings",
     "steps": [
       {
@@ -1042,27 +1020,125 @@
       },
       {
         "type": "action",
-        "description": "Click the navigation link to the settings area"
+        "description": "Click the navigation item for settings"
       },
       {
         "type": "action",
-        "description": "Clear a required settings field or set it to an invalid value"
+        "description": "Modify a settings option to a different value"
       },
       {
         "type": "action",
-        "description": "Save the settings changes"
+        "description": "Save settings changes"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for notifications"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for settings"
       },
       {
         "type": "assertion",
-        "description": "Verify a settings validation error is visible"
+        "description": "Verify the updated setting value is still reflected in the settings UI"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC023",
+    "title": "Read state remains consistent between notification detail and list views within session",
+    "description": "After marking a notification as read, its read state remains consistent when opening its details and returning to the list within the same session.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for notifications"
+      },
+      {
+        "type": "action",
+        "description": "Mark a notification as read from the list"
+      },
+      {
+        "type": "action",
+        "description": "Open the same notification from the list"
+      },
+      {
+        "type": "action",
+        "description": "Return to the notifications list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification is still shown as read in the notifications list"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC024",
+    "title": "Class template form validation prevents invalid submission",
+    "description": "Verifies the class template form blocks submission when required fields are missing and shows validation feedback.",
+    "category": "Classes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to class templates"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new class template"
+      },
+      {
+        "type": "action",
+        "description": "Submit the class template form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify required-field validation errors are visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no new class template is added to the templates list"
       }
     ],
     "priority": "Low"
   },
   {
     "id": "TC025",
-    "title": "Show an error on invalid login credentials",
-    "description": "Verifies submitting invalid credentials shows a visible login error and the user is not signed in.",
+    "title": "Reject invalid login credentials",
+    "description": "Verifies signing in with invalid credentials shows an error and does not grant access to the dashboard.",
     "category": "User Login",
     "steps": [
       {
@@ -1071,7 +1147,7 @@
       },
       {
         "type": "action",
-        "description": "Fill invalid-user@example.com into the email field"
+        "description": "Fill invalid@example.com into the email field"
       },
       {
         "type": "action",
@@ -1083,7 +1159,380 @@
       },
       {
         "type": "assertion",
-        "description": "Verify an invalid credentials error is visible"
+        "description": "Verify an invalid-credentials error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is not on the dashboard"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC026",
+    "title": "Coach form required-field validation prevents submission",
+    "description": "Verifies the add-coach form blocks submission when required fields are missing and shows validation feedback.",
+    "category": "Coaches Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to coaches"
+      },
+      {
+        "type": "action",
+        "description": "Start adding a new coach"
+      },
+      {
+        "type": "action",
+        "description": "Submit the coach form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify required-field validation errors are visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no new coach is added to the coaches list"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC027",
+    "title": "Settings validation prevents saving invalid values",
+    "description": "User cannot save settings with invalid or missing required values and sees validation feedback.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for settings"
+      },
+      {
+        "type": "action",
+        "description": "Clear a required settings field or set an invalid value"
+      },
+      {
+        "type": "action",
+        "description": "Save settings changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify settings validation errors are displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC028",
+    "title": "Ticket form shows validation errors for missing required fields",
+    "description": "User cannot submit a ticket with missing required fields and sees validation feedback instead of a new ticket being created.",
+    "category": "Tickets System",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for tickets"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new ticket"
+      },
+      {
+        "type": "action",
+        "description": "Submit the ticket without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ticket form validation errors are displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC029",
+    "title": "Settings page loads and displays configurable options",
+    "description": "User can open the settings page and see configurable options available to view and edit.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for settings"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify settings options are displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC030",
+    "title": "Validate required fields when creating an athlete",
+    "description": "Verifies the athlete creation form blocks submission when required fields are missing and shows validation errors.",
+    "category": "Athletes Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Use the sidebar to navigate to the athletes section"
+      },
+      {
+        "type": "action",
+        "description": "Start adding a new athlete"
+      },
+      {
+        "type": "action",
+        "description": "Submit the new athlete form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify required-field validation errors are visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no new athlete is added to the athletes list"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC031",
+    "title": "Cancel a coach deletion keeps the coach in the list",
+    "description": "Verifies cancelling a coach deletion leaves the coach record unchanged in the coaches list.",
+    "category": "Coaches Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the sidebar link to coaches"
+      },
+      {
+        "type": "action",
+        "description": "Start adding a new coach"
+      },
+      {
+        "type": "action",
+        "description": "Fill Coach Keep into the name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid coach contact value into the contact field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the coach form"
+      },
+      {
+        "type": "action",
+        "description": "Select the coach record to delete"
+      },
+      {
+        "type": "action",
+        "description": "Cancel the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the coach still appears in the coaches list"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC032",
+    "title": "Tickets page shows an empty state when no tickets exist in session",
+    "description": "User sees an empty state on the tickets page when no tickets have been created in the current session.",
+    "category": "Tickets System",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for tickets"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty state is displayed for the tickets list"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC033",
+    "title": "Notifications page shows an empty state when no notifications exist",
+    "description": "User sees an empty state on the notifications page when there are no notifications available.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for notifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty state is displayed for notifications"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC034",
+    "title": "Repeatedly marking a notification as read keeps UI stable",
+    "description": "User can attempt to mark the same notification as read multiple times and the UI remains stable with the notification staying read.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item for notifications"
+      },
+      {
+        "type": "action",
+        "description": "Mark a notification as read from the list"
+      },
+      {
+        "type": "action",
+        "description": "Mark the same notification as read again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification remains shown as read in the notifications list"
       }
     ],
     "priority": "Low"

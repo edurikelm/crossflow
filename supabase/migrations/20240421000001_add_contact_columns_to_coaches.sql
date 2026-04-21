@@ -1,0 +1,9 @@
+-- Add contact columns to coaches table
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS phone TEXT;
+
+-- Add similar columns to athletes table
+ALTER TABLE athletes ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE athletes ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+ALTER TABLE athletes ADD COLUMN IF NOT EXISTS phone TEXT;

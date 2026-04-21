@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Plus, Search, Pencil, Trash2 } from "lucide-react";
 import type { AthleteWithProfile, MembershipWithPlan } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,42 +64,36 @@ export default function AthletesPage() {
     },
   });
 
-  const fetchAthletes = async () => {
+  const fetchAthletes = useCallback(async () => {
     setIsLoading(true);
-    const query = supabase
-      .from("athletes")
-      .select(`
-        *,
-        profile:profile_id (*),
-        memberships (
-          *,
-          plan:membership_plan_id (*)
-        )
-      `)
-      .order("created_at", { ascending: false });
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+      if (statusFilter === "active") params.set("status", "active");
+      else if (statusFilter === "inactive") params.set("status", "expired");
 
-    const { data, error } = await query;
-
-    if (data) {
-      const athletesWithActiveMembership = data.map((athlete) => ({
-        ...athlete,
-        membership: athlete.memberships?.find((m: MembershipWithPlan) => m.status === "active"),
-      }));
-      setAthletes(athletesWithActiveMembership);
+      const res = await fetch(`/api/athletes${params.toString() ? `?${params}` : ""}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAthletes(data);
+      }
+    } catch (error) {
+      console.error("Error fetching athletes:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
+  }, [searchQuery, statusFilter]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAthletes();
-  }, []);
+  }, [fetchAthletes]);
 
   const filteredAthletes = athletes.filter((athlete) => {
+    const profile = athlete.profile as { full_name?: string; email?: string } | undefined;
     const matchesSearch =
       !searchQuery ||
-      athlete.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      athlete.profile?.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile?.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -113,50 +107,19 @@ export default function AthletesPage() {
     setIsSubmitting(true);
     try {
       if (editingAthlete) {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            full_name: data.full_name,
-            phone: data.phone,
-          })
-          .eq("id", editingAthlete.profile_id);
-
-        if (!error) {
-          await supabase
-            .from("athletes")
-            .update({
-              emergency_contact: data.emergency_contact,
-              emergency_phone: data.emergency_phone,
-              health_notes: data.health_notes,
-              current_level: data.current_level,
-            })
-            .eq("id", editingAthlete.id);
-        }
-      } else {
-        const { data: authData } = await supabase.auth.admin.createUser({
-          email: data.email,
-          password: Math.random().toString(36).slice(-8), // eslint-disable-line react-hooks/purity
-          user_metadata: { full_name: data.full_name },
+        const res = await fetch(`/api/athletes/${editingAthlete.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
         });
-
-        if (authData.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("gym_id")
-            .eq("id", authData.user.id)
-            .single();
-
-          if (profile) {
-            await supabase.from("athletes").insert({
-              profile_id: authData.user.id,
-              gym_id: profile.gym_id,
-              emergency_contact: data.emergency_contact,
-              emergency_phone: data.emergency_phone,
-              health_notes: data.health_notes,
-              current_level: data.current_level || "beginner",
-            });
-          }
-        }
+        if (!res.ok) throw new Error("Failed to update athlete");
+      } else {
+        const res = await fetch("/api/athletes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to create athlete");
       }
 
       reset();
@@ -172,10 +135,11 @@ export default function AthletesPage() {
 
   const handleEdit = (athlete: AthleteWithProfile) => {
     setEditingAthlete(athlete);
+    const profile = athlete.profile as { full_name?: string; email?: string; phone?: string } | undefined;
     reset({
-      full_name: athlete.profile?.full_name || "",
-      email: athlete.profile?.email || "",
-      phone: athlete.profile?.phone || "",
+      full_name: profile?.full_name || "",
+      email: profile?.email || "",
+      phone: profile?.phone || "",
       emergency_contact: athlete.emergency_contact || "",
       emergency_phone: athlete.emergency_phone || "",
       health_notes: athlete.health_notes || "",
@@ -186,10 +150,7 @@ export default function AthletesPage() {
 
   const handleDelete = async (athlete: AthleteWithProfile) => {
     if (confirm("¿Estás seguro de eliminar este atleta?")) {
-      await supabase.from("athletes").delete().eq("id", athlete.id);
-      if (athlete.profile_id) {
-        await supabase.auth.admin.deleteUser(athlete.profile_id);
-      }
+      await fetch(`/api/athletes/${athlete.id}`, { method: "DELETE" });
       fetchAthletes();
     }
   };
@@ -268,13 +229,15 @@ export default function AthletesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredAthletes.map((athlete) => (
+              filteredAthletes.map((athlete) => {
+                const profile = athlete.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+                return (
                 <TableRow key={athlete.id}>
                   <TableCell className="font-medium">
-                    {athlete.profile?.full_name || "Sin nombre"}
+                    {profile?.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{athlete.profile?.email}</TableCell>
-                  <TableCell>{athlete.profile?.phone || "-"}</TableCell>
+                  <TableCell>{profile?.email}</TableCell>
+                  <TableCell>{profile?.phone || "-"}</TableCell>
                   <TableCell>
                     {athlete.membership?.plan?.name || "Sin plan"}
                   </TableCell>
@@ -305,7 +268,7 @@ export default function AthletesPage() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))
+              )})
             )}
           </TableBody>
         </Table>
@@ -370,15 +333,10 @@ export default function AthletesPage() {
                 <Select
                   value={editingAthlete?.current_level || "beginner"}
                   onValueChange={(value) =>
-                    reset({
-                      full_name: editingAthlete?.profile?.full_name || "",
-                      email: editingAthlete?.profile?.email || "",
-                      phone: editingAthlete?.profile?.phone || "",
-                      emergency_contact: editingAthlete?.emergency_contact || "",
-                      emergency_phone: editingAthlete?.emergency_phone || "",
-                      health_notes: editingAthlete?.health_notes || "",
+                    setEditingAthlete((prev: AthleteWithProfile | null) => prev ? {
+                      ...prev,
                       current_level: value as "beginner" | "intermediate" | "advanced" | "all_levels"
-                    })
+                    } : null)
                   }
                 >
                   <SelectTrigger>

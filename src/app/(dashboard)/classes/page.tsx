@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +30,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Clock, Users } from "lucide-react";
 import type { ClassTemplate } from "@/types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { classTemplateSchema, type ClassTemplateInput } from "@/lib/validations";
 
 const LEVEL_COLORS: Record<string, string> = {
   beginner: "bg-green-100 text-green-800",
@@ -39,129 +41,71 @@ const LEVEL_COLORS: Record<string, string> = {
   all_levels: "bg-blue-100 text-blue-800",
 };
 
-const DEFAULT_SECTIONS = [
-  { name: "warmup", minutes: 10, description: "Calentamiento general" },
-  { name: "strength", minutes: 15, description: "Fuerza/Power" },
-  { name: "wod", minutes: 20, description: "WOD" },
-  { name: "cooldown", minutes: 10, description: "Volver a la calma" },
-];
+type Level = "beginner" | "intermediate" | "advanced" | "all_levels";
 
 export default function ClassesPage() {
-  const supabase = createClient();
   const [classes, setClasses] = useState<ClassTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassTemplate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState<{
-    name: string;
-    description: string;
-    duration_minutes: number;
-    capacity: number;
-    level: "beginner" | "intermediate" | "advanced" | "all_levels";
-    focus_area: string[];
-    color: string;
-  }>({
-    name: "",
-    description: "",
-    duration_minutes: 60,
-    capacity: 20,
-    level: "all_levels",
-    focus_area: ["crossfit"],
-    color: "#3B82F6",
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ClassTemplateInput>({
+    resolver: zodResolver(classTemplateSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      duration_minutes: 60,
+      capacity: 20,
+      level: "all_levels" as Level,
+      focus_area: ["crossfit"],
+      color: "#3B82F6",
+    },
   });
 
-  const fetchClasses = async () => {
+  const focusArea = watch("focus_area");
+
+  const fetchClasses = useCallback(async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
-      .from("class_templates")
-      .select("*")
-      .eq("is_active", true)
-      .order("name");
-
-    if (data) {
-      setClasses(data);
+    try {
+      const res = await fetch("/api/class_templates");
+      if (res.ok) {
+        const data = await res.json();
+        setClasses(data);
+      }
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchClasses();
   }, []);
 
-  const handleOpenDialog = (cls?: ClassTemplate) => {
-    if (cls) {
-      setEditingClass(cls);
-      setFormData({
-        name: cls.name,
-        description: cls.description || "",
-        duration_minutes: cls.duration_minutes,
-        capacity: cls.capacity,
-        level: cls.level as "beginner" | "intermediate" | "advanced" | "all_levels",
-        focus_area: cls.focus_area || ["crossfit"],
-        color: cls.color,
-      });
-    } else {
-      setEditingClass(null);
-      setFormData({
-        name: "",
-        description: "",
-        duration_minutes: 60,
-        capacity: 20,
-        level: "all_levels",
-        focus_area: ["crossfit"],
-        color: "#3B82F6",
-      });
-    }
-    setIsDialogOpen(true);
-  };
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
 
-  const handleSubmit = async () => {
+  const onSubmit = async (data: ClassTemplateInput) => {
     setIsSubmitting(true);
     try {
-      const sections =
-        editingClass?.sections && editingClass.sections.length > 0
-          ? editingClass.sections
-          : DEFAULT_SECTIONS;
-
       if (editingClass) {
-        await supabase
-          .from("class_templates")
-          .update({
-            name: formData.name,
-            description: formData.description,
-            duration_minutes: formData.duration_minutes,
-            capacity: formData.capacity,
-            level: formData.level,
-            focus_area: formData.focus_area,
-            color: formData.color,
-          })
-          .eq("id", editingClass.id);
+        const res = await fetch(`/api/class_templates/${editingClass.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update class");
       } else {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("gym_id")
-          .eq("id", (await supabase.auth.getUser()).data.user?.id)
-          .single();
-
-        if (profile) {
-          await supabase.from("class_templates").insert({
-            gym_id: profile.gym_id,
-            name: formData.name,
-            description: formData.description,
-            duration_minutes: formData.duration_minutes,
-            capacity: formData.capacity,
-            level: formData.level,
-            focus_area: formData.focus_area,
-            color: formData.color,
-            sections,
-          });
-        }
+        const res = await fetch("/api/class_templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to create class");
       }
 
       setIsDialogOpen(false);
+      setEditingClass(null);
+      reset();
       fetchClasses();
     } catch (error) {
       console.error("Error saving class:", error);
@@ -170,14 +114,46 @@ export default function ClassesPage() {
     }
   };
 
+  const handleOpenDialog = (cls?: ClassTemplate) => {
+    if (cls) {
+      setEditingClass(cls);
+      reset({
+        name: cls.name,
+        description: cls.description || "",
+        duration_minutes: cls.duration_minutes,
+        capacity: cls.capacity,
+        level: cls.level as Level,
+        focus_area: cls.focus_area || ["crossfit"],
+        color: cls.color,
+      });
+    } else {
+      setEditingClass(null);
+      reset({
+        name: "",
+        description: "",
+        duration_minutes: 60,
+        capacity: 20,
+        level: "all_levels" as Level,
+        focus_area: ["crossfit"],
+        color: "#3B82F6",
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
   const handleDelete = async (cls: ClassTemplate) => {
     if (confirm("¿Estás seguro de eliminar esta clase?")) {
-      await supabase
-        .from("class_templates")
-        .update({ is_active: false })
-        .eq("id", cls.id);
+      await fetch(`/api/class_templates/${cls.id}`, { method: "DELETE" });
       fetchClasses();
     }
+  };
+
+  const toggleFocusArea = (area: string) => {
+    const current = focusArea || [];
+    const updated = current.includes(area)
+      ? current.filter((a) => a !== area)
+      : [...current, area];
+    setValue("focus_area", updated);
   };
 
   return (
@@ -300,63 +276,54 @@ export default function ClassesPage() {
                 : "Crea una nueva plantilla de clase"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre de la clase</Label>
               <Input
                 id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                {...register("name")}
                 placeholder="WOD General"
               />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Descripción</Label>
               <Input
                 id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                {...register("description")}
                 placeholder="Descripción opcional de la clase"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duration">Duración (minutos)</Label>
+                <Label htmlFor="duration_minutes">Duración (minutos)</Label>
                 <Input
-                  id="duration"
+                  id="duration_minutes"
                   type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      duration_minutes: parseInt(e.target.value) || 60,
-                    })
-                  }
+                  {...register("duration_minutes", { valueAsNumber: true })}
                   min={15}
                   max={180}
                 />
+                {errors.duration_minutes && (
+                  <p className="text-sm text-destructive">{errors.duration_minutes.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="capacity">Cupos</Label>
                 <Input
                   id="capacity"
                   type="number"
-                  value={formData.capacity}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      capacity: parseInt(e.target.value) || 20,
-                    })
-                  }
+                  {...register("capacity", { valueAsNumber: true })}
                   min={1}
                   max={100}
                 />
+                {errors.capacity && (
+                  <p className="text-sm text-destructive">{errors.capacity.message}</p>
+                )}
               </div>
             </div>
 
@@ -364,13 +331,8 @@ export default function ClassesPage() {
               <div className="space-y-2">
                 <Label>Nivel</Label>
                 <Select
-                  value={formData.level}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      level: value as typeof formData.level,
-                    })
-                  }
+                  value={watch("level")}
+                  onValueChange={(value) => setValue("level", value as Level)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -382,6 +344,9 @@ export default function ClassesPage() {
                     <SelectItem value="advanced">Avanzado</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.level && (
+                  <p className="text-sm text-destructive">{errors.level.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color">Color</Label>
@@ -389,72 +354,56 @@ export default function ClassesPage() {
                   <Input
                     id="color"
                     type="color"
-                    value={formData.color}
-                    onChange={(e) =>
-                      setFormData({ ...formData, color: e.target.value })
-                    }
+                    {...register("color")}
                     className="w-12 p-1"
                   />
                   <Input
-                    value={formData.color}
-                    onChange={(e) =>
-                      setFormData({ ...formData, color: e.target.value })
-                    }
+                    value={watch("color")}
+                    {...register("color")}
                     placeholder="#3B82F6"
                   />
                 </div>
+                {errors.color && (
+                  <p className="text-sm text-destructive">{errors.color.message}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>Enfoque</Label>
+              <input type="hidden" {...register("focus_area")} />
               <div className="flex flex-wrap gap-2">
                 {["crossfit", "strength", "cardio", "olympic", "gymnastics", "endurance"].map(
                   (area) => (
                     <Badge
                       key={area}
-                      variant={
-                        formData.focus_area.includes(area)
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={focusArea?.includes(area) ? "default" : "outline"}
                       className="cursor-pointer"
-                      onClick={() => {
-                        if (formData.focus_area.includes(area)) {
-                          setFormData({
-                            ...formData,
-                            focus_area: formData.focus_area.filter(
-                              (a) => a !== area
-                            ),
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            focus_area: [...formData.focus_area, area],
-                          });
-                        }
-                      }}
+                      onClick={() => toggleFocusArea(area)}
                     >
                       {area}
                     </Badge>
                   )
                 )}
               </div>
+              {errors.focus_area && (
+                <p className="text-sm text-destructive">{errors.focus_area.message}</p>
+              )}
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !formData.name}>
-              {isSubmitting ? "Guardando..." : "Guardar"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Guardando..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
