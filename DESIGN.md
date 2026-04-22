@@ -113,6 +113,39 @@ Traditional shadows are too "soft" for this system. We use **Tonal Layering** to
 *   **Position:** Absolute, `right-4 top-4`.
 *   **Style:** `text-on_surface_variant` with opacity transition on hover.
 
+#### Detail Dialog (Entity View)
+Variante de modal de gran tamaño para mostrar el detalle completo de una entidad (clase programada, atleta, etc.). Se diferencia del Form Dialog en estructura, tamaño y propósito.
+
+**Container:**
+*   `max-w-4xl`, `max-h-[90vh]`, `flex flex-col` — columna con scroll interno.
+*   `bg-surface_container_lowest`, `rounded-lg`, `shadow-2xl shadow-black/80`, `p-0`.
+
+**Header (fijo, `shrink-0`):**
+*   Fondo: `bg-surface_container_lowest`, padding `p-8`.
+*   Acento visual: barra vertical izquierda de 4px en `bg-primary_container` (`absolute top-0 left-0 w-1 h-full`).
+*   Eyebrow: `text-[10px] font-black tracking-[0.2em] text-primary_container uppercase font-display`. Ejemplo: `CLASS_INFO_VIEW`.
+*   Título: `text-4xl font-display font-extrabold tracking-tighter text-white uppercase`.
+*   Metadatos en línea: separados por divisores `h-8 w-px bg-neutral-800`. Cada meta usa label `text-[10px] text-neutral-500 font-bold tracking-widest uppercase` + valor `text-sm font-bold text-white`.
+*   Avatar de persona: `w-10 h-10 rounded-full bg-primary_container/20 border border-primary_container/30`, iniciales en `text-xs font-black text-primary_container`.
+
+**Área de contenido (scrollable, `flex-1 overflow-y-auto`):**
+*   Padding `p-8`, espacio entre secciones `space-y-8`.
+*   Encabezados de sección: icono `w-4 h-4 text-primary_container` + label `text-xs font-black tracking-widest text-neutral-400 uppercase font-display`.
+*   Bloques de contenido: `bg-surface_container_low p-5 rounded-lg`.
+
+**Tabla de asistentes:**
+*   Header row: `bg-surface_container_lowest`, celdas con `text-[10px] font-bold text-neutral-500 tracking-widest uppercase`.
+*   Body rows: `hover:bg-surface_container_low transition-colors`, separadas por `divide-y divide-neutral-900/50`.
+*   ID: `text-xs font-mono text-neutral-400` con prefijo `#`.
+*   Nombre: `text-sm font-bold text-white`.
+*   Badges de membership/status: `text-[9px] font-black rounded-sm uppercase px-2 py-0.5`.
+
+**Footer (fijo, `shrink-0`):**
+*   Fondo: `bg-surface_container_lowest`, padding `p-6`.
+*   Botón secundario (outline): `px-6 py-2.5 text-xs font-bold text-neutral-400 border border-neutral-800 rounded hover:text-white hover:border-neutral-600 uppercase tracking-widest font-display`.
+*   Botón primario (filled): `px-8 py-2.5 text-xs font-bold bg-primary_container text-on_primary_container rounded hover:brightness-110 uppercase tracking-widest font-display shadow-lg shadow-primary_container/20`.
+*   Ambos botones con `active:scale-95` para feedback táctil.
+
 ## 6. Layout Patterns
 
 ### Form Layout
