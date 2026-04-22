@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KINETIC ARCHIVE | Performance Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#131313",
+                        "outline": "#ac8889",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary": "#233143",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container": "#201f1f",
+                        "surface": "#131313",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-tertiary": "#552100",
+                        "on-primary-fixed-variant": "#920028",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "surface-tint": "#ffb3b6",
+                        "primary-container": "#e11d48",
+                        "on-background": "#e5e2e1",
+                        "secondary": "#b9c8de",
+                        "on-surface": "#e5e2e1",
+                        "inverse-surface": "#e5e2e1",
+                        "inverse-primary": "#be0037",
+                        "surface-variant": "#353534",
+                        "surface-bright": "#393939",
+                        "on-surface-variant": "#e5bdbe",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-fixed": "#341100",
+                        "on-primary": "#68001a",
+                        "surface-container-high": "#2a2a2a",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-primary-fixed": "#40000c",
+                        "on-primary-container": "#fffaf9",
+                        "tertiary-container": "#bf5300",
+                        "primary": "#ffb3b6",
+                        "primary-fixed": "#ffdada",
+                        "outline-variant": "#5c3f40",
+                        "background": "#131313",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface-container-highest": "#353534",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#fffaf8",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbca",
+                        "tertiary": "#ffb690",
+                        "primary-fixed-dim": "#ffb3b6",
+                        "secondary-container": "#39485a",
+                        "on-tertiary-fixed-variant": "#783200"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "display": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #131313;
+            background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-module {
+            background: rgba(28, 27, 27, 0.7);
+            backdrop-filter: blur(12px);
+        }
+        .milled-edge {
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #393939; border-radius: 4px; }
+    </style>
+</head>
+<body class="font-body text-on-surface min-h-screen p-8 lg:p-12">
+<div class="max-w-[1600px] mx-auto space-y-8">
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row justify-between items-end gap-6 pb-4">
+<div class="space-y-1">
+<h2 class="font-headline font-black text-6xl tracking-[-0.04em] text-primary-container uppercase">
+                    Performance Ledger
+                </h2>
+<div class="flex items-center gap-4">
+<span class="font-mono text-secondary tracking-widest text-sm uppercase">Archive_Cycle: 2024.03</span>
+<div class="h-px w-24 bg-outline-variant/30"></div>
+<span class="font-headline font-bold text-2xl uppercase tracking-tighter">OCTOBER 2024</span>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low p-1 rounded-lg">
+<button class="p-3 hover:bg-surface-container-high text-on-surface transition-colors rounded-lg group">
+<span class="material-symbols-outlined group-active:scale-90 block">chevron_left</span>
+</button>
+<button class="px-6 py-2 bg-surface-container-high font-mono text-xs uppercase tracking-widest font-bold hover:text-primary-container transition-colors">
+                    Today
+                </button>
+<button class="p-3 hover:bg-surface-container-high text-on-surface transition-colors rounded-lg group">
+<span class="material-symbols-outlined group-active:scale-90 block">chevron_right</span>
+</button>
+</div>
+</header>
+<!-- Calendar Container -->
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden relative shadow-2xl">
+<!-- Grid Header -->
+<div class="grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] bg-surface-container shadow-lg z-10 sticky top-0 border-b border-outline-variant/10">
+<div class="p-4 border-r border-outline-variant/10"></div>
+<!-- Day Headers -->
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Mon</span>
+<span class="font-headline font-extrabold text-2xl leading-none">14</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Tue</span>
+<span class="font-headline font-extrabold text-2xl leading-none">15</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-high text-primary-container relative">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-container mb-1">Wed</span>
+<span class="font-headline font-extrabold text-2xl leading-none">16</span>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-primary-container"></div>
+</div>
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Thu</span>
+<span class="font-headline font-extrabold text-2xl leading-none">17</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Fri</span>
+<span class="font-headline font-extrabold text-2xl leading-none">18</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center border-r border-outline-variant/10 bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Sat</span>
+<span class="font-headline font-extrabold text-2xl leading-none">19</span>
+</div>
+<div class="p-4 flex flex-col items-center justify-center bg-surface-container-low/50">
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline mb-1">Sun</span>
+<span class="font-headline font-extrabold text-2xl leading-none text-outline">20</span>
+</div>
+</div>
+<!-- Grid Body -->
+<div class="relative grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] min-h-[1000px] bg-surface-container-lowest">
+<!-- Time Markers Left Column -->
+<div class="flex flex-col border-r border-outline-variant/10">
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">06:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">08:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">10:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">12:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">14:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">16:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">18:00</div>
+<div class="h-32 flex items-start justify-end pr-4 pt-2 font-mono text-xs text-outline/50">20:00</div>
+</div>
+<!-- Grid Vertical Separators -->
+<div class="border-r border-outline-variant/5"></div>
+<div class="border-r border-outline-variant/5"></div>
+<div class="border-r border-outline-variant/10 bg-surface-container-low/10"></div>
+<div class="border-r border-outline-variant/5"></div>
+<div class="border-r border-outline-variant/5"></div>
+<div class="border-r border-outline-variant/5"></div>
+<div class="bg-surface-container-lowest"></div>
+<!-- Horizontal Lines Layer (Overlay) -->
+<div class="absolute inset-0 pointer-events-none">
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+<div class="h-32 border-b border-outline-variant/5"></div>
+</div>
+<!-- Class Cards Layer -->
+<div class="absolute inset-0 grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr_1fr_1fr]">
+<div></div> <!-- Spacer for time axis -->
+<!-- MONDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute top-2 left-2 right-2 h-24 glass-module rounded border-l-4 border-primary-container p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-primary-container">Crossfit Open</h4>
+<p class="font-mono text-[10px] text-outline mb-2">06:00 - 07:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">18/20</span>
+<span class="bg-tertiary-container/20 text-tertiary text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Limited</span>
+</div>
+</div>
+<div class="absolute top-64 left-2 right-2 h-40 glass-module rounded border-l-4 border-secondary p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-secondary-fixed">Olympic Lifting</h4>
+<p class="font-mono text-[10px] text-outline mb-2">10:00 - 11:30</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">12/15</span>
+<span class="bg-secondary-container/20 text-secondary text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Available</span>
+</div>
+</div>
+</div>
+<!-- TUESDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute top-32 left-2 right-2 h-24 glass-module rounded border-l-4 border-primary-container p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-primary-container">Engine Build</h4>
+<p class="font-mono text-[10px] text-outline mb-2">08:00 - 09:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">20/20</span>
+<span class="bg-error-container/20 text-error text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Full</span>
+</div>
+</div>
+</div>
+<!-- WEDNESDAY CLASSES (ACTIVE) -->
+<div class="relative p-2">
+<div class="absolute top-2 left-2 right-2 h-24 bg-primary-container rounded p-3 shadow-lg shadow-primary-container/20 group cursor-pointer active:scale-95 transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 text-white">Crossfit Open</h4>
+<p class="font-mono text-[10px] text-white/70 mb-2">06:00 - 07:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-on-primary-fixed/30 px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-widest rounded-sm">19/20</span>
+<span class="bg-white/20 text-white text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Active</span>
+</div>
+</div>
+<div class="absolute top-128 left-2 right-2 h-24 glass-module rounded border-l-4 border-primary-container p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-primary-container">Kettlebell Flow</h4>
+<p class="font-mono text-[10px] text-outline mb-2">14:00 - 15:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">08/20</span>
+<span class="bg-secondary-container/20 text-secondary text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Available</span>
+</div>
+</div>
+<!-- Current Time Marker Line -->
+<div class="absolute top-[210px] left-[-100px] right-0 h-0.5 bg-primary-container z-20 flex items-center">
+<div class="w-2 h-2 rounded-full bg-primary-container ml-[96px]"></div>
+<div class="ml-2 px-2 py-0.5 bg-primary-container text-[10px] font-mono font-bold text-white uppercase">Live: 09:15</div>
+</div>
+</div>
+<!-- THURSDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute top-2 left-2 right-2 h-24 glass-module rounded border-l-4 border-outline p-3 opacity-40 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1">Rest Day</h4>
+<p class="font-mono text-[10px] text-outline mb-2">06:00 - 07:00</p>
+</div>
+</div>
+<!-- FRIDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute top-48 left-2 right-2 h-32 glass-module rounded border-l-4 border-secondary p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-secondary-fixed">Mobility Work</h4>
+<p class="font-mono text-[10px] text-outline mb-2">09:00 - 10:30</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">05/15</span>
+<span class="bg-secondary-container/20 text-secondary text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Available</span>
+</div>
+</div>
+<div class="absolute top-[512px] left-2 right-2 h-24 glass-module rounded border-l-4 border-primary-container p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-primary-container">Heavy Metcon</h4>
+<p class="font-mono text-[10px] text-outline mb-2">16:00 - 17:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">18/20</span>
+<span class="bg-tertiary-container/20 text-tertiary text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Limited</span>
+</div>
+</div>
+</div>
+<!-- SATURDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute top-64 left-2 right-2 h-48 glass-module rounded border-l-4 border-primary-container p-3 group cursor-pointer hover:bg-surface-container-high transition-all">
+<h4 class="font-headline font-black text-sm uppercase tracking-tight leading-none mb-1 group-hover:text-primary-container">Weekend Warrior</h4>
+<p class="font-mono text-[10px] text-outline mb-2">10:00 - 13:00</p>
+<div class="flex items-center justify-between">
+<span class="bg-surface-container-lowest px-2 py-0.5 text-[9px] font-bold text-secondary uppercase tracking-widest rounded-sm">24/24</span>
+<span class="bg-error-container/20 text-error text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase">Full</span>
+</div>
+</div>
+</div>
+<!-- SUNDAY CLASSES -->
+<div class="relative p-2">
+<div class="absolute inset-4 border-2 border-dashed border-outline-variant/20 rounded flex flex-col items-center justify-center space-y-2">
+<span class="material-symbols-outlined text-outline/30 text-4xl">inventory_2</span>
+<span class="font-mono text-[10px] text-outline/30 uppercase tracking-[0.2em]">Maintenance</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats / Meta -->
+<footer class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container">groups</span>
+</div>
+<div>
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest">Total Attendance</p>
+<p class="font-headline font-bold text-xl uppercase">1,248 <span class="text-xs text-outline font-normal">/mo</span></p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">fitness_center</span>
+</div>
+<div>
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest">Equipment Load</p>
+<p class="font-headline font-bold text-xl uppercase">84.2% <span class="text-xs text-outline font-normal">peak</span></p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">bolt</span>
+</div>
+<div>
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest">Efficiency</p>
+<p class="font-headline font-bold text-xl uppercase">96% <span class="text-xs text-outline font-normal">target</span></p>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-2">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a focused athletic woman in a gym setting with harsh side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDftn0-6Pc0IwxG9uOY4_BiJRKC890hpJlU-5kqXCqm1ehRR8FC8jkYnIEyR5EVRO5glJzuiEo-B98nEDiGfMuako-4o83xR4qNueLm2Q53ajYJR7XisRKwimiMM1LmOX4MLOB9aqQtZSlJ7J5TZmyl3JH1Q5viaXjmpT4ZFFufAXNAW32F3dIbHNuRbIxKvEjNwHTnyOftWLXurTnQJVuVfhR9KVBaAY7JpxWJc73y921DRPbXvIyMgOgUBOzUPtEEMZvwlx9T_BY"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a muscular man looking intense after a workout in a moody industrial gym" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp7vKPTnxJarRtNF_Me-ntRotU2V7pMKAy3lrVaTDP5VewpB6txnTjOf4QSBsPYBYX74Tjeq2xNqu5YGnoFNKRvY0MLBNn8_2f9mFLa6PeQ3D_bPSu7Bmb1YmZErcHnTrD5emV70kIU-AoOI5Tnjmj5fE4BLftjsDljQCsyy-FzOv_m1p8Bp2Ycu91ixXRZYD8n9AdPaflsX1z7hMpGpogLsy3n8IPHr5r8l_m4UXQXsUFm1dqCem3AHJ-VApei1S14gCww5RyTts"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a fitness coach in athletic gear against a dark concrete wall background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAurYxZWv_Oq-pcxTt0D6hVRyi06DXQC8Hgr89bu0WB7Whn9yGah6TQ_08oZgcXpAjMLUhoXAvrthbThFqCxBRiNqAG7tSCTqzcIVF7H4_kAWZynMWx47KFnmdfLEpZyrjcb62K9uucuvIxxbFRD7TF4kPAJ_y-AWsMPBn4tp0gzOv-jI_19zgi_kjcNF50Ft0gz_muwssdEpJy3FPiapZ2cTh_FlVrqiz01ogcztwh--wbXwOpHvuKdzCIRgIksjdXBOxCqr8Of60"/>
+</div>
+<div class="ml-2">
+<p class="text-[10px] text-outline uppercase font-bold tracking-widest">Top Performers</p>
+<p class="font-headline font-bold text-sm uppercase text-primary-container">View Ledger →</p>
+</div>
+</div>
+</footer>
+</div>
+<!-- Floating Action Button: Book Session -->
+<button class="fixed bottom-12 right-12 bg-primary-container text-on-primary-container p-5 rounded-lg shadow-2xl flex items-center gap-3 milled-edge group active:scale-90 transition-transform z-50">
+<span class="material-symbols-outlined font-bold" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-headline font-extrabold uppercase tracking-widest text-lg">Book Session</span>
+</button>
+</body></html>

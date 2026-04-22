@@ -1,18 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronLeft, ChevronRight, Clock, Users, LayoutList, FileText } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Users, LayoutList, FileText } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -197,18 +189,6 @@ export default function CalendarPage() {
   const handlePrevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
   const handleNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
 
-  const handleSlotClick = (date: Date, hour: number) => {
-    setFormData({
-      class_template_id: "",
-      coach_id: "",
-      date: format(date, "yyyy-MM-dd"),
-      start_time: `${hour.toString().padStart(2, "0")}:00`,
-      end_time: `${(hour + 1).toString().padStart(2, "0")}:00`,
-      notes: "",
-    });
-    setIsDialogOpen(true);
-  };
-
   const handleEventClick = async (cls: ScheduledClassWithDetails) => {
     setSelectedEvent(cls);
     setAttendees([]);
@@ -251,137 +231,214 @@ export default function CalendarPage() {
     fetchData(currentWeek);
   };
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const isClassActive = (cls: ScheduledClassWithDetails) => {
+    const now = currentTime;
+    const classDate = parseISO(cls.date);
+    if (!isSameDay(classDate, now)) return false;
+    const [startH, startM] = (cls.start_time || "00:00").split(":").map(Number);
+    const [endH, endM] = (cls.end_time || "00:00").split(":").map(Number);
+    const classStart = startH * 60 + startM;
+    const classEnd = endH * 60 + endM;
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    return currentMinutes >= classStart && currentMinutes < classEnd;
+  };
+
+  const getAvailabilityBadge = (cls: ScheduledClassWithDetails) => {
+    const remaining = cls.spots_remaining ?? 0;
+    if (remaining === 0) {
+      return { label: "Completa", className: "bg-error-container/20 text-error" };
+    }
+    if (remaining <= 3) {
+      return { label: "Limitada", className: "bg-tertiary-container/20 text-tertiary" };
+    }
+    return { label: "Disponible", className: "bg-secondary-container/20 text-secondary" };
+  };
+
+  const getLivePosition = () => {
+    const now = currentTime;
+    const hours = now.getHours();
+    if (hours < 6 || hours >= 20) return null;
+    const minutes = now.getMinutes();
+    const topOffset = ((hours - 6) * 60 + minutes) * (80 / 60);
+    return topOffset;
+  };
+
+  const livePosition = getLivePosition();
+  const monthYear = format(currentWeek, "MMMM yyyy").toUpperCase();
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Calendario"
-        description="Programación semanal de clases"
-        actions={
-          <Button onClick={() => {
-            setFormData({
-              class_template_id: "",
-              coach_id: "",
-              date: format(new Date(), "yyyy-MM-dd"),
-              start_time: "09:00",
-              end_time: "10:00",
-              notes: "",
-            });
-            setIsDialogOpen(true);
-          }}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Clase
-          </Button>
-        }
-      />
-
-      {/* Week Navigation */}
-      <div className="flex items-center justify-between">
+      {/* Header Section */}
+      <header className="flex flex-col md:flex-row justify-between items-end gap-6 pb-4">
+        <div className="space-y-1">
+          <h2 className="font-display font-black text-5xl tracking-[-0.04em] text-primary_container uppercase">
+            Rendimiento
+          </h2>
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-secondary tracking-widest text-xs uppercase">
+              {format(currentWeek, "yyyy.MM")}
+            </span>
+            <div className="h-px w-16 bg-outline-variant/30" />
+            <span className="font-display font-bold text-xl uppercase tracking-tighter">
+              {monthYear}
+            </span>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+          <Button variant="outline" size="icon" onClick={handlePrevWeek} className="hover:bg-surface-container-high">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-lg font-medium">
-            {format(weekDays[0], "dd MMM")} - {format(weekDays[6], "dd MMM yyyy")}
-          </span>
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+          <Button variant="outline" onClick={() => setCurrentWeek(new Date())} className="px-4 font-mono text-xs uppercase tracking-widest font-bold hover:text-primary_container">
+            Hoy
+          </Button>
+          <Button variant="outline" size="icon" onClick={handleNextWeek} className="hover:bg-surface-container-high">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="outline" onClick={() => setCurrentWeek(new Date())}>
-          Hoy
+        <Button onClick={() => {
+          setFormData({
+            class_template_id: "",
+            coach_id: "",
+            date: format(new Date(), "yyyy-MM-dd"),
+            start_time: "09:00",
+            end_time: "10:00",
+            notes: "",
+          });
+          setIsDialogOpen(true);
+        }}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nueva Clase
         </Button>
-      </div>
+      </header>
 
       {/* Calendar Grid */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="grid grid-cols-8 border-b">
-            <div className="border-r p-2" />
-            {weekDays.map((day) => (
-              <div
-                key={day.toISOString()}
-                className={cn(
-                  "border-r p-2 text-center",
-                  isSameDay(day, new Date()) && "bg-primary/5"
-                )}
-              >
-                <p className="text-xs text-muted-foreground">
-                  {format(day, "EEE", { locale: es })}
-                </p>
-                <p className={cn(
-                  "text-lg font-semibold",
-                  isSameDay(day, new Date()) && "text-primary"
-                )}>
-                  {format(day, "d")}
-                </p>
-              </div>
-            ))}
-          </div>
+      <div className="bg-surface_container_low rounded-lg overflow-hidden">
+        <div className="grid grid-cols-8 border-b">
+          <div className="border-r p-2" />
+          {weekDays.map((day) => (
+            <div
+              key={day.toISOString()}
+              className={cn(
+                "border-r p-2 text-center",
+                isSameDay(day, new Date()) && "bg-primary/5"
+              )}
+            >
+              <p className="text-xs text-muted-foreground">
+                {format(day, "EEE", { locale: es })}
+              </p>
+              <p className={cn(
+                "text-lg font-semibold",
+                isSameDay(day, new Date()) && "text-primary"
+              )}>
+                {format(day, "d")}
+              </p>
+            </div>
+          ))}
+        </div>
 
-          <div className="max-h-150 overflow-y-auto">
-            {HOURS.map((hour) => (
-              <div key={hour} className="grid grid-cols-8 border-b">
-                <div className="border-r p-2 text-xs text-muted-foreground">
-                  {hour}:00
-                </div>
-                {weekDays.map((day) => {
-                  const dayClasses = getClassesForDay(day).filter(
-                    (cls) => parseInt(cls.start_time.split(":")[0]) === hour
-                  );
-                  return (
-                    <div
-                      key={`${day.toISOString()}-${hour}`}
-                      className={cn(
-                        "border-r min-h-20 p-1 cursor-pointer hover:bg-muted/50 transition-colors",
-                        isSameDay(day, new Date()) && "bg-primary/5"
-                      )}
-                      onClick={() => handleSlotClick(day, hour)}
-                    >
-                      {dayClasses.map((cls) => (
+        <div className="max-h-150 overflow-y-auto relative">
+          {livePosition !== null && (
+            <div
+              className="absolute left-0 right-0 h-0.5 bg-primary_container z-20 flex items-center pointer-events-none"
+              style={{ top: `${livePosition}px` }}
+            >
+              <div className="w-2 h-2 rounded-full bg-primary_container" />
+              <div className="ml-2 px-2 py-0.5 bg-primary_container text-[10px] font-mono font-bold text-white uppercase">
+                En vivo: {format(currentTime, "HH:mm")}
+              </div>
+            </div>
+          )}
+          {HOURS.map((hour) => (
+            <div key={hour} className="grid grid-cols-8 border-b">
+              <div className="border-r p-2 text-xs text-muted-foreground">
+                {hour}:00
+              </div>
+              {weekDays.map((day) => {
+                const dayClasses = getClassesForDay(day).filter(
+                  (cls) => parseInt(cls.start_time.split(":")[0]) === hour
+                );
+                return (
+                  <div
+                    key={`${day.toISOString()}-${hour}`}
+                    className={cn(
+                      "border-r min-h-20 p-1 cursor-pointer hover:bg-muted/50 transition-colors",
+                      isSameDay(day, new Date()) && "bg-primary/5"
+                    )}
+                  >
+                    {dayClasses.map((cls) => {
+                      const isActive = isClassActive(cls);
+                      const badge = getAvailabilityBadge(cls);
+                      return (
                         <div
                           key={cls.id}
-                          className="rounded-md p-1.5 text-xs mb-1 cursor-pointer hover:opacity-80 transition-opacity"
-                          style={{ backgroundColor: cls.class_templates?.color || "#3B82F6" }}
+                          className={cn(
+                            "rounded p-2 text-xs mb-1 cursor-pointer transition-all relative",
+                            isActive
+                              ? "bg-primary_container shadow-lg shadow-primary_container/20"
+                              : "bg-[rgba(28,27,27,0.7)] hover:bg-[#2a2a2a]"
+                          )}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEventClick(cls);
                           }}
                         >
-                          <p className="font-medium text-white truncate">
-                            {cls.class_templates?.name || "Clase"}
-                          </p>
-                          <p className="text-white/80 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {cls.start_time?.slice(0, 5)}
-                          </p>
-                          {cls.coaches && (
-                            <p className="text-white/80 truncate">
-                              {cls.coaches.profile?.full_name}
-                            </p>
+                          {!isActive && (
+                            <div
+                              className="absolute left-0 top-0 bottom-0 w-1 rounded-l"
+                              style={{ backgroundColor: cls.class_templates?.color || "#3B82F6" }}
+                            />
                           )}
+                          <h4 className={cn(
+                            "font-display font-black text-xs uppercase tracking-tight leading-none mb-1 truncate",
+                            isActive ? "text-white" : "group-hover:text-primary_container"
+                          )}
+                          style={!isActive ? { color: cls.class_templates?.color || "#3B82F6" } : undefined}
+                          >
+                            {cls.class_templates?.name || "Clase"}
+                          </h4>
+                          <p className={cn("font-mono text-[10px] mb-2", isActive ? "text-white/70" : "text-outline")}>
+                            {cls.start_time?.slice(0, 5)} - {cls.end_time?.slice(0, 5)}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className={cn("font-mono text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase", isActive ? "bg-white/20 text-white" : "bg-surface_container_lowest text-secondary")}>
+                              {(cls.capacity ?? 0) - (cls.spots_remaining ?? 0)}/{cls.capacity ?? 0}
+                            </span>
+                            <span className={cn("font-mono text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase", badge.className, isActive && "bg-white/20 text-white")}>
+                              {badge.label}
+                            </span>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Class Templates Sidebar */}
       <div className="grid gap-4 lg:grid-cols-4">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base">Plantillas</CardTitle>
-            <CardDescription>Arrastra o haz clic para crear</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <div className="lg:col-span-1 bg-surface_container_low rounded-lg p-4">
+          <h3 className="font-display font-bold text-sm uppercase tracking-widest text-outline mb-3">Plantillas</h3>
+          <div className="space-y-2">
             {classTemplates.map((template) => (
               <div
                 key={template.id}
-                className="flex items-center gap-2 rounded-lg border p-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 rounded-md border border-outline-variant/20 p-2 cursor-pointer hover:bg-surface_container_high transition-colors"
                 onClick={() => {
                   setFormData({
                     class_template_id: template.id,
@@ -395,14 +452,14 @@ export default function CalendarPage() {
                 }}
               >
                 <div
-                  className="h-3 w-3 rounded-full"
+                  className="h-2.5 w-2.5 rounded-full shrink-0"
                   style={{ backgroundColor: template.color }}
                 />
-                <span className="text-sm">{template.name}</span>
+                <span className="text-sm truncate">{template.name}</span>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Event Details Dialog */}
