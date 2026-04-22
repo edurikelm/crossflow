@@ -266,16 +266,6 @@ export default function CalendarPage() {
     return { label: "Disponible", className: "bg-secondary-container/20 text-secondary" };
   };
 
-  const getLivePosition = () => {
-    const now = currentTime;
-    const hours = now.getHours();
-    if (hours < 6 || hours >= 20) return null;
-    const minutes = now.getMinutes();
-    const topOffset = ((hours - 6) * 60 + minutes) * (80 / 60);
-    return topOffset;
-  };
-
-  const livePosition = getLivePosition();
   const monthYear = format(currentWeek, "MMMM yyyy").toUpperCase();
 
   return (
@@ -307,7 +297,9 @@ export default function CalendarPage() {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <Button onClick={() => {
+        <Button 
+        className="font-display"
+        onClick={() => {
           setFormData({
             class_template_id: "",
             coach_id: "",
@@ -324,9 +316,9 @@ export default function CalendarPage() {
       </header>
 
       {/* Calendar Grid */}
-      <div className="bg-surface_container_low rounded-lg overflow-hidden">
+      <div className="bg-surface_container_low rounded-lg overflow-hidden font-display">
         <div className="grid grid-cols-8 border-b">
-          <div className="border-r p-2" />
+          <div className="border-r p-2 " />
           {weekDays.map((day) => (
             <div
               key={day.toISOString()}
@@ -348,18 +340,7 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        <div className="max-h-150 overflow-y-auto relative">
-          {livePosition !== null && (
-            <div
-              className="absolute left-0 right-0 h-0.5 bg-primary_container z-20 flex items-center pointer-events-none"
-              style={{ top: `${livePosition}px` }}
-            >
-              <div className="w-2 h-2 rounded-full bg-primary_container" />
-              <div className="ml-2 px-2 py-0.5 bg-primary_container text-[10px] font-mono font-bold text-white uppercase">
-                En vivo: {format(currentTime, "HH:mm")}
-              </div>
-            </div>
-          )}
+        <div className="max-h-150 overflow-y-auto">
           {HOURS.map((hour) => (
             <div key={hour} className="grid grid-cols-8 border-b">
               <div className="border-r p-2 text-xs text-muted-foreground">
@@ -408,9 +389,14 @@ export default function CalendarPage() {
                           >
                             {cls.class_templates?.name || "Clase"}
                           </h4>
-                          <p className={cn("font-mono text-[10px] mb-2", isActive ? "text-white/70" : "text-outline")}>
+                          <p className={cn("font-mono text-[10px] mb-1", isActive ? "text-white/70" : "text-outline")}>
                             {cls.start_time?.slice(0, 5)} - {cls.end_time?.slice(0, 5)}
                           </p>
+                          {cls.coaches && (
+                            <p className={cn("text-[10px] mb-2 truncate", isActive ? "text-white/60" : "text-outline/70")}>
+                              {cls.coaches.profile?.full_name}
+                            </p>
+                          )}
                           <div className="flex items-center justify-between">
                             <span className={cn("font-mono text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase", isActive ? "bg-white/20 text-white" : "bg-surface_container_lowest text-secondary")}>
                               {(cls.capacity ?? 0) - (cls.spots_remaining ?? 0)}/{cls.capacity ?? 0}
