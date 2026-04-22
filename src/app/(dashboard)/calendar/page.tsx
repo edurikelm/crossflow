@@ -17,8 +17,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -64,7 +62,7 @@ export default function CalendarPage() {
     date: "",
     start_time: "",
     end_time: "",
-    capacity: 20,
+    notes: "",
   });
 
   const weekStart = useMemo(() => startOfWeek(currentWeek, { weekStartsOn: 1 }), [currentWeek]);
@@ -139,7 +137,7 @@ export default function CalendarPage() {
       date: format(date, "yyyy-MM-dd"),
       start_time: `${hour.toString().padStart(2, "0")}:00`,
       end_time: `${(hour + 1).toString().padStart(2, "0")}:00`,
-      capacity: 20,
+      notes: "",
     });
     setIsDialogOpen(true);
   };
@@ -159,7 +157,7 @@ export default function CalendarPage() {
         date: formData.date,
         start_time: formData.start_time,
         end_time: `${Math.floor(endHour).toString().padStart(2, "0")}:${((endHour % 1) * 60).toString().padStart(2, "0")}`,
-        capacity: formData.capacity,
+        notes: formData.notes,
       }),
     });
 
@@ -187,7 +185,7 @@ export default function CalendarPage() {
               date: format(new Date(), "yyyy-MM-dd"),
               start_time: "09:00",
               end_time: "10:00",
-              capacity: 20,
+              notes: "",
             });
             setIsDialogOpen(true);
           }}>
@@ -313,7 +311,7 @@ export default function CalendarPage() {
                     date: format(new Date(), "yyyy-MM-dd"),
                     start_time: "09:00",
                     end_time: "10:00",
-                    capacity: template.capacity,
+                    notes: "",
                   });
                   setIsDialogOpen(true);
                 }}
@@ -331,149 +329,296 @@ export default function CalendarPage() {
 
       {/* Event Details Dialog */}
       <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <div className="flex items-center gap-3">
-              {selectedEvent?.class_templates && (
-                <div
-                  className="h-4 w-4 rounded-full"
-                  style={{ backgroundColor: selectedEvent.class_templates.color }}
-                />
-              )}
-              <DialogTitle>{selectedEvent?.class_templates?.name || "Clase"}</DialogTitle>
-            </div>
-            <DialogDescription>
-              Información de la clase programada
-            </DialogDescription>
-          </DialogHeader>
-          {selectedEvent && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Fecha</p>
-                  <p className="font-medium">
-                    {format(parseISO(selectedEvent.date), "dd/MM/yyyy")}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Hora</p>
-                  <p className="font-medium">
-                    {selectedEvent.start_time?.slice(0, 5)} - {selectedEvent.end_time?.slice(0, 5)}
-                  </p>
-                </div>
-              </div>
+        <DialogContent className="w-full max-w-4xl max-h-[921px] bg-surface overflow-hidden rounded-lg shadow-2xl shadow-black/80 p-0">
+          <DialogTitle className="sr-only">
+            {selectedEvent?.class_templates?.name || "Clase"}
+          </DialogTitle>
 
+          {/* Close Button Top Right */}
+          <button
+            onClick={() => setIsEventDialogOpen(false)}
+            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer active:scale-90"
+          >
+            <span className="material-symbols-outlined text-3xl">close</span>
+          </button>
+
+          {/* Header Section */}
+          <div className="relative overflow-hidden bg-surface-container-lowest p-8 border-b-0">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary-container" />
+            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Coach</p>
-                <p className="font-medium">{selectedEvent.profiles?.full_name || "No asignado"}</p>
-              </div>
-
-              {selectedEvent.class_templates?.description && (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Descripción</p>
-                  <p className="text-sm">{selectedEvent.class_templates.description}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Duración</p>
-                  <p className="font-medium">{selectedEvent.class_templates?.duration_minutes || 60} min</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Cupos</p>
-                  <p className="font-medium flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {selectedEvent.spots_remaining} / {selectedEvent.capacity}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Nivel</p>
-                <p className="font-medium">
-                  {selectedEvent.class_templates?.level === "all_levels"
-                    ? "Todos los niveles"
-                    : selectedEvent.class_templates?.level === "beginner"
-                    ? "Principiante"
-                    : selectedEvent.class_templates?.level === "intermediate"
-                    ? "Intermedio"
-                    : selectedEvent.class_templates?.level === "advanced"
-                    ? "Avanzado"
-                    : selectedEvent.class_templates?.level}
-                </p>
-              </div>
-
-              {selectedEvent.class_templates?.focus_area && selectedEvent.class_templates.focus_area.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Enfoque</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedEvent.class_templates.focus_area.map((area) => (
-                      <span
-                        key={area}
-                        className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs"
-                      >
-                        {area}
-                      </span>
-                    ))}
+                <span className="inline-block text-[10px] font-black tracking-[0.2em] text-primary-container uppercase font-headline">
+                  CLASS_INFO_VIEW
+                </span>
+                <h2 className="text-4xl font-headline font-extrabold tracking-tighter text-white uppercase">
+                  {selectedEvent?.class_templates?.name || "CLASE"}
+                </h2>
+                <div className="flex items-center gap-6 mt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high">
+                      <div className="w-full h-full bg-surface-container-high" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase">Lead Coach</p>
+                      <p className="text-sm font-bold text-white">{selectedEvent?.profiles?.full_name || "No asignado"}</p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-px bg-neutral-800" />
+                  <div>
+                    <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase">Session Time</p>
+                    <p className="text-sm font-bold text-white">
+                      {selectedEvent?.start_time?.slice(0, 5)} - {selectedEvent?.end_time?.slice(0, 5)}
+                    </p>
+                  </div>
+                  <div className="h-8 w-px bg-neutral-800" />
+                  <div>
+                    <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase">Date</p>
+                    <p className="text-sm font-bold text-white uppercase">
+                      {selectedEvent ? format(parseISO(selectedEvent.date), "dd MMM yyyy") : ""}
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          )}
-          <DialogFooter className="flex-row justify-between gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-              onClick={async () => {
-                if (!selectedEvent) return;
-                if (!confirm("¿Eliminar esta clase?")) return;
+          </div>
 
-                await fetch(`/api/scheduled_classes/${selectedEvent.id}`, { method: "DELETE" });
-                setIsEventDialogOpen(false);
-                fetchData(currentWeek);
-              }}
+          {/* Content Area (Scrollable) */}
+          <div className="flex-1 overflow-y-auto no-scrollbar p-8 space-y-10">
+            {/* Class Details Section */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="material-symbols-outlined text-primary-container">list_alt</span>
+                <h3 className="text-xs font-black tracking-widest text-neutral-400 uppercase font-headline">CLASS DETAILS</h3>
+              </div>
+              <div className="bg-surface-container-low p-5 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* Warm-up */}
+                  <div>
+                    <h4 className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-3 border-b border-primary-container/20 pb-1">01_WARM_UP</h4>
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-white uppercase">
+                        {selectedEvent?.class_templates?.warmup || "Ver detalles"}
+                      </p>
+                      <p className="text-xs text-neutral-400 font-medium leading-relaxed italic">
+                        Dynamic Joint Mobility & Core Activation
+                      </p>
+                    </div>
+                  </div>
+                  {/* Strength/Skill */}
+                  <div>
+                    <h4 className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-3 border-b border-primary-container/20 pb-1">02_STRENGTH_SKILL</h4>
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-white uppercase">
+                        {selectedEvent?.class_templates?.strength_skill || "Ver detalles"}
+                      </p>
+                      {selectedEvent?.class_templates?.prescription && (
+                        <p className="text-xs font-mono text-white bg-surface-container-high px-2 py-1 inline-block">
+                          {selectedEvent.class_templates.prescription}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Metcon */}
+                  <div>
+                    <h4 className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-3 border-b border-primary-container/20 pb-1">03_METCON</h4>
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-white uppercase italic">
+                        {selectedEvent?.class_templates?.metcon_name || '"METCON"'}
+                      </p>
+                      {selectedEvent?.class_templates?.metcon && (
+                        <p className="text-xs font-bold text-white">
+                          {selectedEvent.class_templates.metcon}
+                        </p>
+                      )}
+                      {selectedEvent?.class_templates?.metcon_movements && selectedEvent.class_templates.metcon_movements.length > 0 && (
+                        <ul className="text-[11px] text-neutral-400 space-y-1 font-medium">
+                          {selectedEvent.class_templates.metcon_movements.map((movement, idx) => (
+                            <li key={idx}>{movement}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Stats Section */}
+            <section>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-surface-container-low rounded-lg p-4">
+                  <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Duration</p>
+                  <p className="text-lg font-bold text-white">{selectedEvent?.class_templates?.duration_minutes || 60} min</p>
+                </div>
+                <div className="bg-surface-container-low rounded-lg p-4">
+                  <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Capacity</p>
+                  <p className="text-lg font-bold text-white">{selectedEvent?.spots_remaining} / {selectedEvent?.capacity}</p>
+                </div>
+                <div className="bg-surface-container-low rounded-lg p-4">
+                  <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Level</p>
+                  <p className="text-lg font-bold text-white uppercase text-xs">
+                    {selectedEvent?.class_templates?.level === "all_levels"
+                      ? "ALL LEVELS"
+                      : selectedEvent?.class_templates?.level?.toUpperCase() || "N/A"}
+                  </p>
+                </div>
+                {selectedEvent?.class_templates?.focus_area && selectedEvent.class_templates.focus_area.length > 0 && (
+                  <div className="bg-surface-container-low rounded-lg p-4">
+                    <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Focus</p>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedEvent.class_templates.focus_area.map((area) => (
+                        <span key={area} className="text-xs font-medium text-white bg-surface-container-high px-1.5 py-0.5 rounded uppercase">
+                          {area}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Attendance Section */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary-container">groups</span>
+                  <h3 className="text-xs font-black tracking-widest text-neutral-400 uppercase font-headline">
+                    ATHLETE_ROSTER ({selectedEvent?.attendees?.length || 0}/{selectedEvent?.capacity || 0})
+                  </h3>
+                </div>
+                <button className="text-[10px] font-bold text-primary-container hover:underline tracking-widest uppercase">
+                  Add Athlete
+                </button>
+              </div>
+              {selectedEvent?.attendees && selectedEvent.attendees.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-surface-container-lowest">
+                        <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-[0.1em] uppercase">ATHLETE_ID</th>
+                        <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-[0.1em] uppercase">NAME</th>
+                        <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-[0.1em] uppercase">MEMBERSHIP</th>
+                        <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-[0.1em] uppercase">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-900/50">
+                      {selectedEvent.attendees.map((athlete) => (
+                        <tr key={athlete.id} className="hover:bg-surface-container-low transition-colors">
+                          <td className="px-4 py-4 text-xs font-mono text-neutral-400">#{athlete.athlete_id?.slice(0, 6) || "N/A"}</td>
+                          <td className="px-4 py-4 text-sm font-bold text-white">{athlete.athletes?.full_name || "Athlete"}</td>
+                          <td className="px-4 py-4">
+                            <span className="px-2 py-0.5 text-[9px] font-black rounded-sm bg-tertiary-container text-on-tertiary-container uppercase">
+                              {athlete.athletes?.membership_plans?.name || "STANDARD"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-2 py-0.5 text-[9px] font-black rounded-sm uppercase ${
+                              athlete.status === "checked_in"
+                                ? "bg-secondary-container text-on-secondary-container"
+                                : athlete.status === "waiting"
+                                ? "bg-tertiary-container text-on-tertiary-container"
+                                : "bg-surface-container-high text-neutral-300"
+                            }`}>
+                              {athlete.status?.replace("_", " ") || "PENDING"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="bg-surface-container-low rounded-lg p-8 text-center">
+                  <p className="text-neutral-500 text-sm">No athletes enrolled in this class</p>
+                </div>
+              )}
+            </section>
+
+            {/* Description & Notes */}
+            {(selectedEvent?.class_templates?.description || selectedEvent?.notes) && (
+              <section>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="material-symbols-outlined text-primary-container">description</span>
+                  <h3 className="text-xs font-black tracking-widest text-neutral-400 uppercase font-headline">ADDITIONAL INFO</h3>
+                </div>
+                <div className="space-y-4">
+                  {selectedEvent?.class_templates?.description && (
+                    <div className="bg-surface-container-low p-5 rounded-lg">
+                      <p className="text-[10px] text-primary-container font-bold tracking-widest uppercase mb-2">Description</p>
+                      <p className="text-sm text-white">{selectedEvent.class_templates.description}</p>
+                    </div>
+                  )}
+                  {selectedEvent?.notes && (
+                    <div className="bg-surface-container-low p-5 rounded-lg">
+                      <p className="text-[10px] text-primary-container font-bold tracking-widest uppercase mb-2">Notes</p>
+                      <p className="text-sm text-white">{selectedEvent.notes}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Footer Section */}
+          <div className="p-6 bg-surface-container-lowest flex justify-end items-center gap-4 border-t-0">
+            <button
+              onClick={() => setIsEventDialogOpen(false)}
+              className="px-6 py-2.5 text-xs font-bold text-neutral-400 border border-neutral-800 rounded hover:text-white hover:border-neutral-600 transition-all uppercase tracking-widest font-headline active:scale-95"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </Button>
-            <Button variant="outline" onClick={() => setIsEventDialogOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
+              EDIT_CLASS
+            </button>
+            <button
+              onClick={() => setIsEventDialogOpen(false)}
+              className="px-8 py-2.5 text-xs font-bold bg-primary-container text-on-primary-container rounded hover:brightness-110 transition-all uppercase tracking-widest font-headline shadow-lg shadow-primary-container/20 active:scale-95"
+            >
+              CLOSE_ATTENDANCE
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Create Class Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Nueva Clase</DialogTitle>
-            <DialogDescription>
-              {selectedSlot
-                ? `Programar clase para el ${format(parseISO(selectedSlot.date), "dd/MM/yyyy")} a las ${selectedSlot.hour}:00`
-                : "Configura la clase"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
+        <DialogContent className="w-full max-w-lg bg-surface-container-low rounded-lg p-0 overflow-hidden border border-outline-variant/20">
+          <DialogTitle className="sr-only">Crear Nueva Clase</DialogTitle>
+
+          {/* Close Button */}
+          <button
+            onClick={() => setIsDialogOpen(false)}
+            className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-2xl">close</span>
+          </button>
+
+          {/* Header */}
+          <div className="bg-surface-container-lowest p-6 border-b border-neutral-800/50">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="material-symbols-outlined text-primary text-2xl">fitness_center</span>
+              <div>
+                <p className="text-[10px] font-black tracking-[0.2em] text-neutral-500 uppercase">INDUSTRIAL PERFORMANCE LEDGER</p>
+                <h2 className="text-2xl font-headline font-extrabold tracking-tighter text-white uppercase">NEW_CLASS_ENTRY</h2>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Content */}
+          <div className="p-6 space-y-6">
+            {/* Class Type */}
             <div className="space-y-2">
-              <Label>Plantilla de clase</Label>
+              <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Class Type</Label>
               <Select
                 value={formData.class_template_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, class_template_id: value })
-                }
+                onValueChange={(value) => setFormData({ ...formData, class_template_id: value })}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar clase" />
+                <SelectTrigger className="bg-surface-container-high border-0 h-12 rounded-lg px-4">
+                  <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   {classTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div
-                          className="h-2 w-2 rounded-full"
+                          className="h-3 w-3 rounded-full"
                           style={{ backgroundColor: template.color }}
                         />
                         {template.name}
@@ -484,15 +629,14 @@ export default function CalendarPage() {
               </Select>
             </div>
 
+            {/* Assigned Coach */}
             <div className="space-y-2">
-              <Label>Coach</Label>
+              <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Assigned Coach</Label>
               <Select
                 value={formData.coach_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, coach_id: value })
-                }
+                onValueChange={(value) => setFormData({ ...formData, coach_id: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-surface-container-high border-0 h-12 rounded-lg px-4">
                   <SelectValue placeholder="Seleccionar coach" />
                 </SelectTrigger>
                 <SelectContent>
@@ -505,57 +649,81 @@ export default function CalendarPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Fecha</Label>
+            {/* Session Date */}
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Session Date</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500">calendar_today</span>
                 <Input
                   type="date"
                   value={formData.date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Hora inicio</Label>
-                <Input
-                  type="time"
-                  value={formData.start_time}
-                  onChange={(e) =>
-                    setFormData({ ...formData, start_time: e.target.value })
-                  }
+                  className="h-12 pl-12 bg-surface-container-high border-0 rounded-lg"
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
               </div>
             </div>
 
+            {/* Time Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Start Time */}
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Start Time</Label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500">schedule</span>
+                  <Input
+                    type="time"
+                    value={formData.start_time}
+                    className="h-12 pl-12 bg-surface-container-high border-0 rounded-lg"
+                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* End Time */}
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">End Time</Label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500">timer</span>
+                  <Input
+                    type="time"
+                    value={formData.end_time}
+                    className="h-12 pl-12 bg-surface-container-high border-0 rounded-lg"
+                    onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Administrative Notes */}
             <div className="space-y-2">
-              <Label>Cupos</Label>
-              <Input
-                type="number"
-                value={formData.capacity}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    capacity: parseInt(e.target.value) || 20,
-                  })
-                }
-                min={1}
-                max={100}
+              <Label className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Administrative Notes / Equipment Requirements</Label>
+              <textarea
+                className="flex min-h-[100px] w-full rounded-lg bg-surface-container-high px-4 py-3 text-sm text-white placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-0 border-0 resize-none"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Detalla equipamiento o requerimientos especiales..."
+                rows={4}
               />
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancelar
+          {/* Footer */}
+          <div className="p-6 pt-0 flex gap-4">
+            <Button
+              variant="outline"
+              className="flex-1 h-12 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-600 uppercase tracking-widest font-headline text-xs"
+              onClick={() => setIsDialogOpen(false)}
+            >
+              CANCEL
             </Button>
             <Button
+              className="flex-1 h-12 bg-primary-container text-on-primary-container hover:brightness-110 uppercase tracking-widest font-headline text-xs shadow-lg shadow-primary-container/20"
               onClick={handleSubmit}
               disabled={!formData.class_template_id || !formData.coach_id}
             >
-              Crear Clase
+              CREATE CLASS
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

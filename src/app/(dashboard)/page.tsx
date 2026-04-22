@@ -110,34 +110,30 @@ export default async function DashboardPage() {
       value: metrics.activeAthletes,
       total: metrics.totalAthletes,
       icon: Users,
-      gradient: "from-[#22c55e] to-[#16a34a]",
-      glow: "shadow-[#22c55e]/20",
+      accent: "bg-primary",
     },
     {
       title: "Clases Hoy",
       value: metrics.classesToday,
       icon: Calendar,
-      gradient: "from-[#3b82f6] to-[#2563eb]",
-      glow: "shadow-[#3b82f6]/20",
+      accent: "bg-secondary",
     },
     {
       title: "Tickets Pendientes",
       value: metrics.pendingTickets,
       icon: Ticket,
-      gradient: "from-[#f59e0b] to-[#d97706]",
-      glow: "shadow-[#f59e0b]/20",
+      accent: "bg-tertiary",
     },
     {
       title: "Total Atletas",
       value: metrics.totalAthletes,
       icon: Users,
-      gradient: "from-[#8b5cf6] to-[#7c3aed]",
-      glow: "shadow-[#8b5cf6]/20",
+      accent: "bg-error",
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Panel de Control"
         description="Resumen de la actividad de tu gimnasio"
@@ -147,79 +143,79 @@ export default async function DashboardPage() {
         {statCards.map((stat, index) => (
           <Card
             key={stat.title}
-            className="relative overflow-hidden border-[#1A1A24] bg-[#0D0D12] transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+            className="relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ambient-shadow"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <CardContent className="p-5">
               <div className="relative z-10">
-                <div className={`inline-flex rounded-xl bg-gradient-to-br ${stat.gradient} p-2.5 shadow-lg ${stat.glow}`}>
+                <div className={`inline-flex rounded-md ${stat.accent} p-2.5`}>
                   <stat.icon className="h-5 w-5 text-white" />
                 </div>
               </div>
               <div className="mt-4 relative z-10">
-                <p className="text-3xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+                <p className="text-4xl font-display font-bold text-surface-foreground tracking-tight">
                   {stat.value}
                 </p>
-                <p className="text-xs text-[#8B8B9A] mt-1">{stat.title}</p>
+                <p className="text-xs text-on_surface_variant mt-1">{stat.title}</p>
                 {stat.total !== undefined && (
-                  <p className="text-xs text-[#8B8B9A]">
+                  <p className="text-xs text-on_surface_variant">
                     de {stat.total} total
                   </p>
                 )}
               </div>
-              <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br ${stat.gradient} opacity-10 blur-2xl`} />
+              <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${stat.accent} opacity-10 blur-2xl`} />
             </CardContent>
           </Card>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-[#1A1A24] bg-[#0D0D12]">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-[#1A1A24]">
-            <CardTitle className="text-lg text-white" style={{ fontFamily: "var(--font-display)" }}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle className="text-lg font-display">
               CLASES DE HOY
             </CardTitle>
-            <Button variant="ghost" size="sm" asChild className="text-[#8B8B9A] hover:text-[#22c55e]">
-              <Link href="/dashboard/calendar">
+            <Button variant="ghost" size="sm" asChild className="text-on_surface_variant hover:text-primary">
+              <Link href="/calendar">
                 Ver calendario <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="p-0">
             {todayClasses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="rounded-full bg-[#1A1A24] p-4 mb-4">
-                  <Calendar className="h-8 w-8 text-[#8B8B9A]" />
+                <div className="rounded-md bg-surface_container_high p-4 mb-4">
+                  <Calendar className="h-8 w-8 text-on_surface_variant" />
                 </div>
-                <p className="text-sm text-[#8B8B9A]">
+                <p className="text-sm text-on_surface_variant">
                   No hay clases programadas para hoy
                 </p>
-                <Button className="mt-4 bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:opacity-90" asChild>
-                  <Link href="/dashboard/calendar">Programar clase</Link>
+                <Button className="mt-4" asChild>
+                  <Link href="/calendar">Programar clase</Link>
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {todayClasses.map((cls: ScheduledClassWithDetails) => (
                   <div
                     key={cls.id}
-                    className="flex items-center justify-between rounded-lg border border-[#1A1A24] bg-[#1A1A24]/50 p-3 transition-all duration-200 hover:bg-[#1A1A24] hover:border-[#22c55e]/30"
+                    className="flex items-center justify-between rounded-md p-3 mx-5 mb-1 bg-surface_container_low transition-all duration-200 hover:bg-surface_container_high"
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className="h-10 w-1 rounded-full shadow-lg"
-                        style={{ backgroundColor: cls.class_templates?.color || "#22c55e" }}
+                        className="h-10 w-0.5 rounded-full"
+                        style={{ backgroundColor: cls.class_templates?.color || "var(--color-primary)" }}
                       />
                       <div>
-                        <p className="font-medium text-white">{cls.class_templates?.name || "Clase"}</p>
-                        <div className="flex items-center gap-2 text-xs text-[#8B8B9A]">
+                        <p className="font-medium text-surface-foreground">{cls.class_templates?.name || "Clase"}</p>
+                        <div className="flex items-center gap-2 text-xs text-on_surface_variant">
                           <Clock className="h-3 w-3" />
                           <span>
                             {cls.start_time?.slice(0, 5)} - {cls.end_time?.slice(0, 5)}
                           </span>
                           {cls.profiles?.full_name && (
                             <>
-                              <span className="text-[#1A1A24]">•</span>
+                              <span className="text-surface_container_high">•</span>
                               <span>{cls.profiles.full_name}</span>
                             </>
                           )}
@@ -227,10 +223,10 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-bold text-surface-foreground">
                         {cls.current_bookings || 0}/{cls.capacity}
                       </p>
-                      <p className="text-xs text-[#8B8B9A]">cupos</p>
+                      <p className="text-xs text-on_surface_variant">cupos</p>
                     </div>
                   </div>
                 ))}
@@ -239,41 +235,39 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-[#1A1A24] bg-[#0D0D12]">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-[#1A1A24]">
-            <CardTitle className="text-lg text-white" style={{ fontFamily: "var(--font-display)" }}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle className="text-lg font-display">
               TICKETS RECIENTES
             </CardTitle>
-            <Button variant="ghost" size="sm" asChild className="text-[#8B8B9A] hover:text-[#22c55e]">
-              <Link href="/dashboard/tickets">
+            <Button variant="ghost" size="sm" asChild className="text-on_surface_variant hover:text-primary">
+              <Link href="/tickets">
                 Ver todos <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="p-0">
             {recentTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="rounded-full bg-[#1A1A24] p-4 mb-4">
-                  <Ticket className="h-8 w-8 text-[#8B8B9A]" />
+                <div className="rounded-md bg-surface_container_high p-4 mb-4">
+                  <Ticket className="h-8 w-8 text-on_surface_variant" />
                 </div>
-                <p className="text-sm text-[#8B8B9A]">
+                <p className="text-sm text-on_surface_variant">
                   No hay tickets pendientes
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {recentTickets.map((ticket: TicketWithDetails) => (
                   <div
                     key={ticket.id}
-                    className="flex items-center justify-between rounded-lg border border-[#1A1A24] bg-[#1A1A24]/50 p-3 transition-all duration-200 hover:bg-[#1A1A24]"
+                    className="flex items-center justify-between rounded-md p-3 mx-5 mb-1 bg-surface_container_low transition-all duration-200 hover:bg-surface_container_high"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col gap-1">
-                        <p className="font-medium text-white">{ticket.subject}</p>
-                        <p className="text-xs text-[#8B8B9A]">
-                          {ticket.athlete?.profile?.full_name || "Sin asignar"}
-                        </p>
-                      </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="font-medium text-surface-foreground">{ticket.subject}</p>
+                      <p className="text-xs text-on_surface_variant">
+                        {ticket.athlete?.profile?.full_name || "Sin asignar"}
+                      </p>
                     </div>
                     <Badge
                       variant={
@@ -283,7 +277,6 @@ export default async function DashboardPage() {
                           ? "warning"
                           : "secondary"
                       }
-                      className={ticket.priority === "urgent" ? "bg-[#ef4444]" : ticket.priority === "high" ? "bg-[#f59e0b]" : "bg-[#1A1A24] text-[#8B8B9A]"}
                     >
                       {ticket.priority}
                     </Badge>

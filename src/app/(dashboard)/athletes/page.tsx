@@ -276,60 +276,63 @@ export default function AthletesPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">
               {editingAthlete ? "Editar Atleta" : "Nuevo Atleta"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left mt-1">
               {editingAthlete
-                ? "Actualiza la información del atleta"
+                ? "Actualiza la informacion del atleta"
                 : "Ingresa los datos del nuevo atleta"}
             </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nombre completo</Label>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="full_name" className="text-xs text-on_surface_variant uppercase tracking-wider">Nombre</Label>
                 <Input
                   id="full_name"
                   {...register("full_name")}
-                  placeholder="Juan Pérez"
+                  placeholder="Juan Perez"
+                  className="h-11"
                 />
                 {errors.full_name && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-xs text-error">
                     {errors.full_name.message}
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs text-on_surface_variant uppercase tracking-wider">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   {...register("email")}
                   placeholder="juan@email.com"
                   disabled={!!editingAthlete}
+                  className="h-11"
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-xs text-error">
                     {errors.email.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="text-xs text-on_surface_variant uppercase tracking-wider">Telefono</Label>
                 <Input
                   id="phone"
                   {...register("phone")}
                   placeholder="+54 11 1234 5678"
+                  className="h-11"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="current_level">Nivel</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="current_level" className="text-xs text-on_surface_variant uppercase tracking-wider">Nivel</Label>
                 <Select
                   value={editingAthlete?.current_level || "beginner"}
                   onValueChange={(value) =>
@@ -339,7 +342,7 @@ export default function AthletesPage() {
                     } : null)
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -352,38 +355,42 @@ export default function AthletesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="emergency_contact">Contacto de emergencia</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="emergency_contact" className="text-xs text-on_surface_variant uppercase tracking-wider">Contacto emergencia</Label>
                 <Input
                   id="emergency_contact"
                   {...register("emergency_contact")}
-                  placeholder="María Pérez"
+                  placeholder="Maria Perez"
+                  className="h-11"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="emergency_phone">Teléfono de emergencia</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="emergency_phone" className="text-xs text-on_surface_variant uppercase tracking-wider">Tel. emergencia</Label>
                 <Input
                   id="emergency_phone"
                   {...register("emergency_phone")}
                   placeholder="+54 11 8765 4321"
+                  className="h-11"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="health_notes">Notas de salud</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="health_notes" className="text-xs text-on_surface_variant uppercase tracking-wider">Notas de salud</Label>
               <Input
                 id="health_notes"
                 {...register("health_notes")}
                 placeholder="Alergias, lesiones, etc."
+                className="h-11"
               />
             </div>
 
-            <DialogFooter>
+            <div className="flex gap-3 p-6 pt-2">
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1 h-11"
                 onClick={() => {
                   setIsDialogOpen(false);
                   setEditingAthlete(null);
@@ -392,10 +399,10 @@ export default function AthletesPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="flex-1 h-11">
                 {isSubmitting ? "Guardando..." : "Guardar"}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

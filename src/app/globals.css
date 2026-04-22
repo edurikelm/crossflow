@@ -1,36 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(220 20% 4%);
-  --color-foreground: hsl(0 0% 98%);
-  --color-card: hsl(220 18% 8%);
-  --color-card-foreground: hsl(0 0% 98%);
-  --color-popover: hsl(220 18% 8%);
-  --color-popover-foreground: hsl(0 0% 98%);
-  --color-primary: hsl(142 85% 45%);
-  --color-primary-foreground: hsl(220 20% 4%);
-  --color-secondary: hsl(220 14% 14%);
-  --color-secondary-foreground: hsl(0 0% 98%);
-  --color-muted: hsl(220 14% 20%);
-  --color-muted-foreground: hsl(220 10% 55%);
-  --color-accent: hsl(220 14% 16%);
-  --color-accent-foreground: hsl(0 0% 98%);
-  --color-destructive: hsl(0 72% 50%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(220 14% 18%);
-  --color-input: hsl(220 14% 18%);
-  --color-ring: hsl(142 85% 45%);
-  --radius: 0.5rem;
-  --color-success: hsl(142 76% 40%);
-  --color-warning: hsl(38 92% 50%);
+  --color-surface: hsl(240 6% 7%);
+  --color-surface-foreground: hsl(0 0% 98%);
+  --color-surface_container_lowest: hsl(240 7% 5%);
+  --color-surface_container_low: hsl(240 6% 9%);
+  --color-surface_container_high: hsl(240 5% 16%);
+  --color-surface_bright: hsl(240 5% 22%);
+  --color-surface_tint: hsl(356 100% 75%);
 
-  --font-display: "Bebas Neue", sans-serif;
-  --font-body: "DM Sans", sans-serif;
+  --color-primary: hsl(356 82% 48%);
+  --color-primary_container: hsl(356 82% 48%);
+  --color-on_primary_container: hsl(0 0% 98%);
+
+  --color-secondary: hsl(213 27% 65%);
+  --color-secondary_container: hsl(215 25% 25%);
+  --color-on_secondary_container: hsl(213 27% 65%);
+
+  --color-tertiary: hsl(28 100% 70%);
+  --color-tertiary_container: hsl(24 100% 40%);
+  --color-on_tertiary_container: hsl(28 100% 70%);
+
+  --color-error: hsl(12 100% 73%);
+  --color-error_container: hsl(0 62% 30%);
+  --color-on_error_container: hsl(12 100% 73%);
+
+  --color-outline_variant: hsl(0 22% 28%);
+  --color-on_surface_variant: hsl(240 5% 65%);
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--color-surface);
+  color: var(--color-surface-foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -38,11 +45,11 @@ body {
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: transparent;
   }
 
   ::selection {
-    background: hsl(142 85% 45% / 0.3);
+    background: hsl(356 82% 48% / 0.3);
     color: hsl(0 0% 98%);
   }
 
@@ -56,12 +63,12 @@ body {
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(220 14% 20%);
+    background: var(--color-surface_container_high);
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(220 14% 30%);
+    background: var(--color-surface_bright);
   }
 }
 
@@ -76,8 +83,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(142 85% 45% / 0.4); }
-  50% { box-shadow: 0 0 20px 4px hsl(142 85% 45% / 0.2); }
+  0%, 100% { box-shadow: 0 0 0 0 hsl(356 82% 48% / 0.4); }
+  50% { box-shadow: 0 0 20px 4px hsl(356 82% 48% / 0.2); }
 }
 
 @keyframes gradient-shift {
@@ -101,4 +108,18 @@ body {
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 8s ease infinite;
+}
+
+.glass {
+  background: hsl(240 5% 22% / 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ambient-shadow {
+  box-shadow: 0 8px 32px hsl(0 0% 0% / 0.06);
+}
+
+.milled-edge {
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.1);
 }

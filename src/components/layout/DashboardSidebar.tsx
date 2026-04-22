@@ -13,7 +13,6 @@ import {
   Ticket,
   Bell,
   Settings,
-  ChevronLeft,
   LogOut,
   X,
 } from "lucide-react";
@@ -76,19 +75,18 @@ export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: Dashboar
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 flex h-full flex-col bg-[#0D0D12] border-r border-[#1A1A24] transition-all duration-300",
+          "fixed left-0 top-0 z-50 flex h-full flex-col bg-surface_container_lowest transition-all duration-300",
           isCollapsed && "-translate-x-full lg:translate-x-0 lg:w-[72px]"
         )}
       >
-        <div className="relative flex h-16 items-center justify-between border-b border-[#1A1A24] px-4">
+        <div className="relative flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#22c55e] to-[#16a34a] shadow-lg shadow-[#22c55e]/20">
-              <Dumbbell className="h-4 w-4 text-white" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-md bg-primary_container shadow-sm milled-edge">
+              <Dumbbell className="h-4 w-4 text-on_primary_container" />
             </div>
             {!isCollapsed && (
               <span
-                className="text-2xl tracking-wider text-white"
-                style={{ fontFamily: "var(--font-display)" }}
+                className="text-2xl tracking-wider text-surface-foreground font-display"
               >
                 CROSSFLOW
               </span>
@@ -97,7 +95,7 @@ export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: Dashboar
           <Button
             variant="ghost"
             size="icon"
-            className="text-[#8B8B9A] hover:text-white hover:bg-[#1A1A24] lg:hidden"
+            className="text-on_surface_variant hover:text-surface-foreground hover:bg-surface_container_low lg:hidden"
             onClick={() => setSidebarCollapsed(true)}
           >
             <X size={18} />
@@ -112,16 +110,16 @@ export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: Dashboar
                 <Link
                   href={item.href}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-gradient-to-r from-[#22c55e]/20 to-transparent text-[#22c55e]"
-                      : "text-[#8B8B9A] hover:bg-[#1A1A24] hover:text-white"
+                      ? "bg-primary/10 text-primary"
+                      : "text-on_surface_variant hover:bg-surface_container_low hover:text-surface-foreground"
                   )}
                   title={isCollapsed ? item.label : undefined}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full bg-[#22c55e]" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 rounded-r-full bg-primary" />
                   )}
                   <span className="flex-shrink-0 transition-transform duration-200 group-hover:scale-110">
                     {item.icon}
@@ -135,10 +133,10 @@ export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: Dashboar
           })}
         </nav>
 
-        <div className="border-t border-[#1A1A24] p-3 space-y-1">
+        <div className="p-3 space-y-1">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8B8B9A] transition-all duration-200 hover:bg-[#1A1A24] hover:text-[#ef4444]"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-on_surface_variant transition-all duration-200 hover:bg-error_container hover:text-error"
             title={isCollapsed ? "Cerrar Sesión" : undefined}
           >
             <LogOut size={20} className="flex-shrink-0" />
@@ -147,10 +145,10 @@ export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: Dashboar
         </div>
 
         {!isCollapsed && (
-          <div className="hidden lg:block h-16 border-t border-[#1A1A24] p-4">
+          <div className="hidden lg:block h-14 p-4">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
-              <span className="text-xs text-[#8B8B9A]">Sistema activo</span>
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs text-on_surface_variant">Sistema activo</span>
             </div>
           </div>
         )}

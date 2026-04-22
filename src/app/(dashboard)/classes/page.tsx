@@ -323,76 +323,80 @@ export default function ClassesPage() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">
               {editingClass ? "Editar Clase" : "Nueva Clase"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left mt-1">
               {editingClass
-                ? "Actualiza la información de la clase"
+                ? "Actualiza la informacion de la clase"
                 : "Crea una nueva plantilla de clase"}
             </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre de la clase</Label>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-4 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs text-on_surface_variant uppercase tracking-wider">Nombre</Label>
               <Input
                 id="name"
                 {...register("name")}
                 placeholder="WOD General"
+                className="h-11"
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-xs text-error">{errors.name.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs text-on_surface_variant uppercase tracking-wider">Descripcion</Label>
               <Input
                 id="description"
                 {...register("description")}
-                placeholder="Descripción opcional de la clase"
+                placeholder="Descripcion opcional de la clase"
+                className="h-11"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="duration_minutes">Duración (minutos)</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="duration_minutes" className="text-xs text-on_surface_variant uppercase tracking-wider">Duracion (min)</Label>
                 <Input
                   id="duration_minutes"
                   type="number"
                   {...register("duration_minutes", { valueAsNumber: true })}
                   min={15}
                   max={180}
+                  className="h-11"
                 />
                 {errors.duration_minutes && (
-                  <p className="text-sm text-destructive">{errors.duration_minutes.message}</p>
+                  <p className="text-xs text-error">{errors.duration_minutes.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Cupos</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="capacity" className="text-xs text-on_surface_variant uppercase tracking-wider">Cupos</Label>
                 <Input
                   id="capacity"
                   type="number"
                   {...register("capacity", { valueAsNumber: true })}
                   min={1}
                   max={100}
+                  className="h-11"
                 />
                 {errors.capacity && (
-                  <p className="text-sm text-destructive">{errors.capacity.message}</p>
+                  <p className="text-xs text-error">{errors.capacity.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Nivel</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Nivel</Label>
                 <Select
                   value={watch("level")}
                   onValueChange={(value) => setValue("level", value as Level)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -403,32 +407,33 @@ export default function ClassesPage() {
                   </SelectContent>
                 </Select>
                 {errors.level && (
-                  <p className="text-sm text-destructive">{errors.level.message}</p>
+                  <p className="text-xs text-error">{errors.level.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="color" className="text-xs text-on_surface_variant uppercase tracking-wider">Color</Label>
                 <div className="flex gap-2">
                   <Input
                     id="color"
                     type="color"
                     {...register("color")}
-                    className="w-12 p-1"
+                    className="w-12 p-1 h-11"
                   />
                   <Input
                     value={watch("color")}
                     {...register("color")}
                     placeholder="#3B82F6"
+                    className="h-11"
                   />
                 </div>
                 {errors.color && (
-                  <p className="text-sm text-destructive">{errors.color.message}</p>
+                  <p className="text-xs text-error">{errors.color.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Enfoque</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Enfoque</Label>
               <input type="hidden" {...register("focus_area")} />
               <div className="flex flex-wrap gap-2">
                 {["crossfit", "strength", "cardio", "olympic", "gymnastics", "endurance"].map(
@@ -445,14 +450,15 @@ export default function ClassesPage() {
                 )}
               </div>
               {errors.focus_area && (
-                <p className="text-sm text-destructive">{errors.focus_area.message}</p>
+                <p className="text-xs text-error">{errors.focus_area.message}</p>
               )}
             </div>
 
-            <DialogFooter>
+            <div className="flex gap-3 p-6 pt-2">
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1 h-11"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancelar
@@ -461,10 +467,11 @@ export default function ClassesPage() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleSave}
+                className="flex-1 h-11"
               >
                 {isSubmitting ? "Guardando..." : "Guardar"}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

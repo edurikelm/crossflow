@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import { DM_Sans, Bebas_Neue } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-display",
   display: "swap",
 });
 
-const bebasNeue = Bebas_Neue({
-  weight: "400",
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -27,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${dmSans.variable} ${bebasNeue.variable}`}>{children}</body>
+      <body className={`${spaceGrotesk.variable} ${inter.variable}`}>{children}</body>
     </html>
   );
 }

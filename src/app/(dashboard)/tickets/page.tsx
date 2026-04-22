@@ -268,78 +268,89 @@ export default function TicketsPage() {
 
       {/* Create Ticket Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear Ticket</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">Crear Ticket</DialogTitle>
+            <DialogDescription className="text-left mt-1">
               Crea un nuevo ticket de soporte
             </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="subject">Asunto</Label>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-4 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="subject" className="text-xs text-on_surface_variant uppercase tracking-wider">Asunto</Label>
               <Input
                 id="subject"
                 {...register("subject")}
                 placeholder="No puedo reservar clase"
+                className="h-11"
               />
               {errors.subject && (
-                <p className="text-sm text-destructive">{errors.subject.message}</p>
+                <p className="text-xs text-error">{errors.subject.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs text-on_surface_variant uppercase tracking-wider">Descripcion</Label>
+              <textarea
+                className="flex min-h-[100px] w-full rounded-md bg-surface_container_high px-3 py-3 text-sm text-surface-foreground placeholder:text-on_surface_variant focus-visible:outline-none focus-visible:ring-0 focus-visible:border-b-2 focus-visible:border-primary resize-none"
                 id="description"
                 {...register("description")}
                 placeholder="Describe tu consulta..."
                 rows={4}
               />
               {errors.description && (
-                <p className="text-sm text-destructive">{errors.description.message}</p>
+                <p className="text-xs text-error">{errors.description.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="priority">Prioridad</Label>
-              <select {...register("priority")} className="w-full p-2 border rounded">
-                <option value="low">Baja</option>
-                <option value="medium">Media</option>
-                <option value="high">Alta</option>
-                <option value="urgent">Urgente</option>
-              </select>
+            <div className="space-y-1.5">
+              <Label htmlFor="priority" className="text-xs text-on_surface_variant uppercase tracking-wider">Prioridad</Label>
+              <Select
+                value={watch("priority")}
+                onValueChange={(value) => setValue("priority", value as "low" | "medium" | "high" | "urgent")}
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Baja</SelectItem>
+                  <SelectItem value="medium">Media</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                  <SelectItem value="urgent">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
               {errors.priority && (
-                <p className="text-sm text-destructive">{errors.priority.message}</p>
+                <p className="text-xs text-error">{errors.priority.message}</p>
               )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
+            <div className="flex gap-3 p-6 pt-2">
+              <Button variant="outline" type="button" className="flex-1 h-11" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="flex-1 h-11">
                 {isSubmitting ? "Creando..." : "Crear"}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
 
       {/* Reply Dialog */}
       <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedTicket?.subject}</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">{selectedTicket?.subject}</DialogTitle>
+            <DialogDescription className="text-left mt-1">
               Respuesta al ticket de{" "}
               {selectedTicket?.athlete?.profile?.full_name || "Sistema"}
             </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="rounded-lg bg-muted p-4">
-              <p className="text-sm">{selectedTicket?.description}</p>
+          </div>
+          <div className="px-6 pb-4 space-y-4">
+            <div className="rounded-md bg-surface_container_high p-4">
+              <p className="text-sm text-on_surface_variant">{selectedTicket?.description}</p>
             </div>
-            <div className="space-y-2">
-              <Label>Tu respuesta</Label>
-              <Textarea
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Tu respuesta</Label>
+              <textarea
+                className="flex min-h-[100px] w-full rounded-md bg-surface_container_high px-3 py-3 text-sm text-surface-foreground placeholder:text-on_surface_variant focus-visible:outline-none focus-visible:ring-0 focus-visible:border-b-2 focus-visible:border-primary resize-none"
                 value={replyMessage}
                 onChange={(e) => setReplyMessage(e.target.value)}
                 placeholder="Escribe tu respuesta..."
@@ -351,28 +362,30 @@ export default function TicketsPage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-9"
                   onClick={() => handleStatusChange(selectedTicket, "resolved")}
                 >
-                  Marcar como resuelto
+                  Marcar resuelto
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-9"
                   onClick={() => handleStatusChange(selectedTicket, "closed")}
                 >
                   Cerrar ticket
                 </Button>
               </div>
             )}
+            <div className="flex gap-3 p-6 pt-2">
+              <Button variant="outline" className="flex-1 h-11" onClick={() => setIsReplyDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleReply} disabled={!replyMessage} className="flex-1 h-11">
+                Enviar
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReplyDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleReply} disabled={!replyMessage}>
-              Enviar respuesta
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -288,68 +288,72 @@ export default function CoachesPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">
               {editingCoach ? "Editar Coach" : "Nuevo Coach"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left mt-1">
               {editingCoach
-                ? "Actualiza la información del coach"
+                ? "Actualiza la informacion del coach"
                 : "Ingresa los datos del nuevo coach"}
             </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nombre completo</Label>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="full_name" className="text-xs text-on_surface_variant uppercase tracking-wider">Nombre</Label>
                 <Input
                   id="full_name"
                   {...register("full_name")}
-                  placeholder="Carlos García"
+                  placeholder="Carlos Garcia"
+                  className="h-11"
                 />
                 {errors.full_name && (
-                  <p className="text-sm text-destructive">{errors.full_name.message}</p>
+                  <p className="text-xs text-error">{errors.full_name.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs text-on_surface_variant uppercase tracking-wider">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   {...register("email")}
                   placeholder="carlos@email.com"
                   disabled={!!editingCoach}
+                  className="h-11"
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                  <p className="text-xs text-error">{errors.email.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="text-xs text-on_surface_variant uppercase tracking-wider">Telefono</Label>
                 <Input
                   id="phone"
                   {...register("phone")}
                   placeholder="+54 11 1234 5678"
+                  className="h-11"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="hourly_rate">Tarifa por hora</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="hourly_rate" className="text-xs text-on_surface_variant uppercase tracking-wider">Tarifa/hr</Label>
                 <Input
                   id="hourly_rate"
                   type="number"
                   step="0.01"
                   {...register("hourly_rate", { valueAsNumber: true })}
                   placeholder="25.00"
+                  className="h-11"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Especialidades</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Especialidades</Label>
               <div className="flex flex-wrap gap-2">
                 {SPECIALTIES.map((spec) => (
                   <Badge
@@ -363,31 +367,33 @@ export default function CoachesPage() {
                 ))}
               </div>
               {errors.specialty && (
-                <p className="text-sm text-destructive">{errors.specialty.message}</p>
+                <p className="text-xs text-error">{errors.specialty.message}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio">Biografía</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="bio" className="text-xs text-on_surface_variant uppercase tracking-wider">Biografia</Label>
               <Input
                 id="bio"
                 {...register("bio")}
-                placeholder="Breve descripción del coach..."
+                placeholder="Breve descripcion del coach..."
+                className="h-11"
               />
             </div>
 
-            <DialogFooter>
+            <div className="flex gap-3 p-6 pt-2">
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1 h-11"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="flex-1 h-11">
                 {isSubmitting ? "Guardando..." : "Guardar"}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

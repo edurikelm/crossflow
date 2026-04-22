@@ -294,52 +294,54 @@ export default function NotificationsPage() {
 
       {/* Create Notification Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Nueva Notificación</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+          <div className="p-6 pb-0">
+            <DialogTitle className="text-left uppercase tracking-wide">Nueva Notificacion</DialogTitle>
+            <DialogDescription className="text-left mt-1">
               Envía un mensaje a tu comunidad
             </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Título</Label>
+          </div>
+          <div className="px-6 pb-4 space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Titulo</Label>
               <Input
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="Recordatorio de clase"
+                className="h-11"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Mensaje</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Mensaje</Label>
               <textarea
-                className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex min-h-[100px] w-full rounded-md bg-surface_container_high px-3 py-3 text-sm text-surface-foreground placeholder:text-on_surface_variant focus-visible:outline-none focus-visible:ring-0 focus-visible:border-b-2 focus-visible:border-primary resize-none"
                 value={formData.body}
                 onChange={(e) =>
                   setFormData({ ...formData, body: e.target.value })
                 }
                 placeholder="Escribe tu mensaje..."
+                rows={4}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Tipo</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value) =>
                     setFormData({ ...formData, type: value as typeof formData.type })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="info">Información</SelectItem>
-                    <SelectItem value="promotion">Promoción</SelectItem>
+                    <SelectItem value="info">Informacion</SelectItem>
+                    <SelectItem value="promotion">Promocion</SelectItem>
                     <SelectItem value="reminder">Recordatorio</SelectItem>
                     <SelectItem value="alert">Alerta</SelectItem>
                     <SelectItem value="announcement">Anuncio</SelectItem>
@@ -347,15 +349,15 @@ export default function NotificationsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>Destinatarios</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Destinatarios</Label>
                 <Select
                   value={formData.target_type}
                   onValueChange={(value) =>
                     setFormData({ ...formData, target_type: value as typeof formData.target_type })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -367,33 +369,35 @@ export default function NotificationsPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Programar (opcional)</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Programar (opcional)</Label>
               <Input
                 type="datetime-local"
                 value={formData.scheduled_for}
                 onChange={(e) =>
                   setFormData({ ...formData, scheduled_for: e.target.value })
                 }
+                className="h-11"
               />
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || !formData.title || !formData.body}
-            >
-              {isSubmitting
-                ? "Enviando..."
-                : formData.scheduled_for
-                ? "Programar"
-                : "Enviar ahora"}
-            </Button>
-          </DialogFooter>
+            <div className="flex gap-3 p-6 pt-2">
+              <Button variant="outline" className="flex-1 h-11" onClick={() => setIsDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !formData.title || !formData.body}
+                className="flex-1 h-11"
+              >
+                {isSubmitting
+                  ? "Enviando..."
+                  : formData.scheduled_for
+                  ? "Programar"
+                  : "Enviar ahora"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
