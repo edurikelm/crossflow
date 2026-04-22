@@ -120,9 +120,6 @@ export interface Coach {
   id: string;
   profile_id: string | null;
   gym_id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
   specialty: string[];
   bio: string | null;
   hourly_rate: number | null;
@@ -132,7 +129,7 @@ export interface Coach {
 }
 
 export interface CoachWithProfile extends Coach {
-  created_by?: Pick<Profile, 'full_name'> | null;
+  profile: Profile;
 }
 
 // ============================================
@@ -214,6 +211,7 @@ export interface ScheduledClass {
 export interface ScheduledClassWithDetails extends ScheduledClass {
   class_templates?: ClassTemplate;
   profiles?: Profile;
+  coaches?: CoachWithProfile;
   spots_remaining: number;
 }
 

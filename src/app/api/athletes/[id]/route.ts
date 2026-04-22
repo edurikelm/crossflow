@@ -38,7 +38,7 @@ export async function PUT(
 
     const { data: athlete, error: fetchError } = await supabase
       .from('athletes')
-      .select('profile_id')
+      .select('profile_id, gym_id')
       .eq('id', id)
       .single();
 

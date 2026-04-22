@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('coaches')
-    .select('*, created_by:profiles!coaches_profile_id_fkey(full_name)');
+    .select('*, profile:profiles(*)');
 
   if (search) {
-    query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+    query = query.or(`profile.full_name.ilike.%${search}%,profile.email.ilike.%${search}%`);
   }
 
   const { data, error } = await query.order('created_at', { ascending: false });
@@ -47,16 +47,49 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = coachSchema.parse(body);
 
-    const insertData = {
-      ...validated,
-      profile_id: profile.id,
-      gym_id: profile.gym_id,
-      is_active: true,
-    };
+    let profileId: string;
+
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', validated.email)
+      .single();
+
+    if (existingProfile) {
+      profileId = existingProfile.id;
+    } else {
+      profileId = crypto.randomUUID();
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: profileId,
+          full_name: validated.full_name,
+          email: validated.email,
+          phone: validated.phone || null,
+          gym_id: profile.gym_id,
+          role: 'coach',
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (createProfileError) {
+        console.error('Profile creation error:', createProfileError);
+        return NextResponse.json({ error: createProfileError.message }, { status: 400 });
+      }
+    }
 
     const { data, error } = await supabase
       .from('coaches')
-      .insert(insertData)
+      .insert({
+        profile_id: profileId,
+        gym_id: profile.gym_id,
+        specialty: validated.specialty || [],
+        bio: validated.bio || null,
+        hourly_rate: validated.hourly_rate || null,
+        contract_start: validated.contract_start || null,
+        is_active: true,
+      })
       .select()
       .single();
 

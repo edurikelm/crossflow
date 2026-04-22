@@ -77,10 +77,11 @@ export default function CoachesPage() {
   }, [fetchCoaches]);
 
   const filteredCoaches = coaches.filter((coach) => {
+    const profile = coach.profile;
     return (
       !searchQuery ||
-      coach.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      coach.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
@@ -123,12 +124,13 @@ export default function CoachesPage() {
   };
 
   const handleOpenDialog = (coach?: CoachWithProfile) => {
+    const profile = coach?.profile;
     if (coach) {
       setEditingCoach(coach);
       reset({
-        full_name: coach.full_name || "",
-        email: coach.email || "",
-        phone: coach.phone || "",
+        full_name: profile?.full_name || "",
+        email: profile?.email || "",
+        phone: profile?.phone || "",
         specialty: coach.specialty || [],
         bio: coach.bio || "",
         hourly_rate: coach.hourly_rate ?? undefined,
@@ -196,7 +198,6 @@ export default function CoachesPage() {
               <TableHead>Teléfono</TableHead>
               <TableHead>Especialidades</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Creado por</TableHead>
               <TableHead>Fecha creación</TableHead>
               <TableHead className="w-[70px]">Acciones</TableHead>
             </TableRow>
@@ -204,25 +205,26 @@ export default function CoachesPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : filteredCoaches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No se encontraron coaches
                 </TableCell>
               </TableRow>
             ) : (
               filteredCoaches.map((coach) => {
+                const profile = coach.profile;
                 return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
-                    {coach.full_name || "Sin nombre"}
+                    {profile?.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{coach.email || "-"}</TableCell>
-                  <TableCell>{coach.phone || "-"}</TableCell>
+                  <TableCell>{profile?.email || "-"}</TableCell>
+                  <TableCell>{profile?.phone || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {coach.specialty?.slice(0, 2).map((s) => (
@@ -241,9 +243,6 @@ export default function CoachesPage() {
                     <Badge variant={coach.is_active ? "success" : "secondary"}>
                       {coach.is_active ? "Activo" : "Inactivo"}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {coach.created_by?.full_name || "-"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(coach.created_at).toLocaleDateString("es-AR", {

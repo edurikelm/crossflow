@@ -40,7 +40,7 @@ import { es } from "date-fns/locale";
 import type { ScheduledClassWithDetails, ClassTemplate } from "@/types";
 import { useAuthStore } from "@/store";
 
-type CoachSelect = { id: string; full_name: string };
+type CoachSelect = { id: string; profile: { full_name: string } };
 
 interface AttendeeRow {
   id: string;
@@ -131,7 +131,6 @@ export default function CalendarPage() {
 
   const weekStart = useMemo(() => startOfWeek(currentWeek, { weekStartsOn: 1 }), [currentWeek]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
-  const gymId = useAuthStore((state) => state.gymId);
 
   const fetchData = useCallback(async (week: Date) => {
     setIsLoading(true);
@@ -146,7 +145,7 @@ export default function CalendarPage() {
       .select(`
         *,
         class_templates (*),
-        profiles:coach_id (id, full_name)
+        coaches (*, profile:profiles(full_name))
       `)
       .gte("date", startDate)
       .lte("date", endDate);
@@ -162,8 +161,15 @@ export default function CalendarPage() {
 
     let coachesRes: { data: CoachSelect[]; error: null } = { data: [], error: null };
     if (currentGymId) {
-      const res = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", currentGymId);
-      if (!res.error) coachesRes = { data: res.data as CoachSelect[], error: null };
+      const res = await supabase.from("coaches").select("id, profiles(full_name)").eq("is_active", true).eq("gym_id", currentGymId);
+      if (!res.error && Array.isArray(res.data)) {
+        type CoachRaw = { id: string; profiles?: { full_name?: string } };
+        const mapped = (res.data as CoachRaw[]).map((coach) => ({
+          id: coach.id,
+          profile: { full_name: coach.profiles?.full_name ?? "" }
+        }));
+        coachesRes = { data: mapped, error: null };
+      }
     }
 
     if (classesRes.data) {
@@ -175,7 +181,7 @@ export default function CalendarPage() {
     if (templatesRes.data) setClassTemplates(templatesRes.data);
     if (coachesRes.data) setCoaches(coachesRes.data);
     setIsLoading(false);
-  }, [supabase, gymId]);
+  }, [supabase]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -312,7 +318,7 @@ export default function CalendarPage() {
             ))}
           </div>
 
-          <div className="max-h-[600px] overflow-y-auto">
+          <div className="max-h-150 overflow-y-auto">
             {HOURS.map((hour) => (
               <div key={hour} className="grid grid-cols-8 border-b">
                 <div className="border-r p-2 text-xs text-muted-foreground">
@@ -326,7 +332,7 @@ export default function CalendarPage() {
                     <div
                       key={`${day.toISOString()}-${hour}`}
                       className={cn(
-                        "border-r min-h-[80px] p-1 cursor-pointer hover:bg-muted/50 transition-colors",
+                        "border-r min-h-20 p-1 cursor-pointer hover:bg-muted/50 transition-colors",
                         isSameDay(day, new Date()) && "bg-primary/5"
                       )}
                       onClick={() => handleSlotClick(day, hour)}
@@ -348,9 +354,9 @@ export default function CalendarPage() {
                             <Clock className="h-3 w-3" />
                             {cls.start_time?.slice(0, 5)}
                           </p>
-                          {cls.profiles && (
+                          {cls.coaches && (
                             <p className="text-white/80 truncate">
-                              {cls.profiles.full_name}
+                              {cls.coaches.profile?.full_name}
                             </p>
                           )}
                         </div>
@@ -430,12 +436,12 @@ export default function CalendarPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary_container/20 border border-primary_container/30 flex items-center justify-center shrink-0">
                     <span className="text-xs font-black text-primary_container">
-                      {getInitials(selectedEvent?.profiles?.full_name)}
+                      {getInitials(selectedEvent?.coaches?.profile?.full_name)}
                     </span>
                   </div>
                   <div>
                     <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase">Entrenador Principal</p>
-                    <p className="text-sm font-bold text-white">{selectedEvent?.profiles?.full_name || "No asignado"}</p>
+                    <p className="text-sm font-bold text-white">{selectedEvent?.coaches?.profile?.full_name || "No asignado"}</p>
                   </div>
                 </div>
                 <div className="h-8 w-px bg-neutral-800" />
@@ -642,7 +648,7 @@ export default function CalendarPage() {
                 <SelectContent>
                   {coaches.map((coach) => (
                     <SelectItem key={coach.id} value={coach.id}>
-                      {coach.full_name || "Coach"}
+                      {coach.profile?.full_name || "Coach"}
                     </SelectItem>
                   ))}
                 </SelectContent>
