@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -18,8 +17,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +30,7 @@ import {
 import { Plus, Search, Ticket, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import type { TicketWithDetails, TicketPriority } from "@/types";
+import type { TicketWithDetails } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ticketSchema, type TicketInput } from "@/lib/validations";
@@ -63,7 +60,7 @@ export default function TicketsPage() {
   const [replyMessage, setReplyMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<TicketInput>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<TicketInput>({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
       subject: "",
@@ -90,6 +87,7 @@ export default function TicketsPage() {
   }, [statusFilter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTickets();
   }, [fetchTickets]);
 

@@ -16,8 +16,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -64,7 +62,7 @@ export default function ClassesPage() {
     },
   });
 
-  const focusArea = watch("focus_area");
+  const focusArea = watch("focus_area"); // eslint-disable-line react-hooks/incompatible-library
 
   const fetchClasses = useCallback(async () => {
     setIsLoading(true);

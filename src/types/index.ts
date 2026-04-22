@@ -109,7 +109,7 @@ export interface Athlete {
 
 export interface AthleteWithProfile extends Athlete {
   profile: Profile;
-  membership?: MembershipWithPlan;
+  membership?: MembershipWithPlan[];
 }
 
 // ============================================
@@ -120,6 +120,9 @@ export interface Coach {
   id: string;
   profile_id: string | null;
   gym_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
   specialty: string[];
   bio: string | null;
   hourly_rate: number | null;
@@ -129,7 +132,7 @@ export interface Coach {
 }
 
 export interface CoachWithProfile extends Coach {
-  profile: Profile;
+  created_by?: Pick<Profile, 'full_name'> | null;
 }
 
 // ============================================

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +16,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -37,14 +34,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Plus, Search, Pencil, Trash2 } from "lucide-react";
-import type { AthleteWithProfile, MembershipWithPlan } from "@/types";
+import type { AthleteWithProfile, MembershipPlan } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { athleteSchema, type AthleteInput } from "@/lib/validations";
 
 export default function AthletesPage() {
-  const supabase = createClient();
   const [athletes, setAthletes] = useState<AthleteWithProfile[]>([]);
+  const [membershipPlans, setMembershipPlans] = useState<MembershipPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -56,13 +53,19 @@ export default function AthletesPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<AthleteInput>({
     resolver: zodResolver(athleteSchema),
     defaultValues: {
       current_level: "beginner",
+      plan_id: undefined,
     },
   });
+
+  const currentLevelValue = watch("current_level");
+  const planIdValue = watch("plan_id");
 
   const fetchAthletes = useCallback(async () => {
     setIsLoading(true);
@@ -84,9 +87,27 @@ export default function AthletesPage() {
     }
   }, [searchQuery, statusFilter]);
 
+  const fetchMembershipPlans = useCallback(async () => {
+    try {
+      const res = await fetch("/api/membership_plans?active=true");
+      if (res.ok) {
+        const data = await res.json();
+        setMembershipPlans(data);
+      }
+    } catch (error) {
+      console.error("Error fetching membership plans:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchAthletes();
   }, [fetchAthletes]);
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      fetchMembershipPlans();
+    }
+  }, [isDialogOpen, fetchMembershipPlans]);
 
   const filteredAthletes = athletes.filter((athlete) => {
     const profile = athlete.profile as { full_name?: string; email?: string } | undefined;
@@ -133,18 +154,34 @@ export default function AthletesPage() {
     }
   };
 
-  const handleEdit = (athlete: AthleteWithProfile) => {
-    setEditingAthlete(athlete);
-    const profile = athlete.profile as { full_name?: string; email?: string; phone?: string } | undefined;
-    reset({
-      full_name: profile?.full_name || "",
-      email: profile?.email || "",
-      phone: profile?.phone || "",
-      emergency_contact: athlete.emergency_contact || "",
-      emergency_phone: athlete.emergency_phone || "",
-      health_notes: athlete.health_notes || "",
-      current_level: athlete.current_level,
-    });
+  const handleOpenDialog = (athlete?: AthleteWithProfile) => {
+    if (athlete) {
+      setEditingAthlete(athlete);
+      const profile = athlete.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+      const membership = athlete.membership?.[0];
+      reset({
+        full_name: profile?.full_name || "",
+        email: profile?.email || "",
+        phone: profile?.phone || "",
+        emergency_contact: athlete.emergency_contact || "",
+        emergency_phone: athlete.emergency_phone || "",
+        health_notes: athlete.health_notes || "",
+        current_level: athlete.current_level,
+        plan_id: membership?.plan?.id || undefined,
+      });
+    } else {
+      setEditingAthlete(null);
+      reset({
+        full_name: "",
+        email: "",
+        phone: "",
+        emergency_contact: "",
+        emergency_phone: "",
+        health_notes: "",
+        current_level: "beginner",
+        plan_id: undefined,
+      });
+    }
     setIsDialogOpen(true);
   };
 
@@ -155,11 +192,11 @@ export default function AthletesPage() {
     }
   };
 
-  const getStatusBadge = (athlete: AthleteWithProfile) => {
+  const getStatusBadge = (athlete: AthleteWithProfile, membership?: { status?: string }) => {
     if (!athlete.is_active) {
       return <Badge variant="secondary">Inactivo</Badge>;
     }
-    if (athlete.membership?.status === "active") {
+    if (membership?.status === "active") {
       return <Badge variant="success">Activo</Badge>;
     }
     return <Badge variant="warning">Vencido</Badge>;
@@ -171,7 +208,7 @@ export default function AthletesPage() {
         title="Atletas"
         description="Gestiona los atletas de tu gimnasio"
         actions={
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => handleOpenDialog()}>
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Atleta
           </Button>
@@ -210,6 +247,7 @@ export default function AthletesPage() {
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Plan</TableHead>
+              <TableHead>Precio</TableHead>
               <TableHead>Nivel</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="w-[70px]">Acciones</TableHead>
@@ -218,19 +256,21 @@ export default function AthletesPage() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : filteredAthletes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   No se encontraron atletas
                 </TableCell>
               </TableRow>
             ) : (
               filteredAthletes.map((athlete) => {
                 const profile = athlete.profile as { full_name?: string; email?: string; phone?: string } | undefined;
+                const membership = athlete.membership?.[0];
+                const plan = membership?.plan;
                 return (
                 <TableRow key={athlete.id}>
                   <TableCell className="font-medium">
@@ -239,12 +279,15 @@ export default function AthletesPage() {
                   <TableCell>{profile?.email}</TableCell>
                   <TableCell>{profile?.phone || "-"}</TableCell>
                   <TableCell>
-                    {athlete.membership?.plan?.name || "Sin plan"}
+                    {plan?.name || "Sin plan"}
+                  </TableCell>
+                  <TableCell>
+                    {plan ? `$${plan.price.toLocaleString('es-AR')}` : "-"}
                   </TableCell>
                   <TableCell className="capitalize">
                     {athlete.current_level?.replace("_", " ") || "N/A"}
                   </TableCell>
-                  <TableCell>{getStatusBadge(athlete)}</TableCell>
+                  <TableCell>{getStatusBadge(athlete, membership)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -253,7 +296,7 @@ export default function AthletesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(athlete)}>
+                        <DropdownMenuItem onClick={() => handleOpenDialog(athlete)}>
                           <Pencil className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
@@ -334,13 +377,8 @@ export default function AthletesPage() {
               <div className="space-y-1.5">
                 <Label htmlFor="current_level" className="text-xs text-on_surface_variant uppercase tracking-wider">Nivel</Label>
                 <Select
-                  value={editingAthlete?.current_level || "beginner"}
-                  onValueChange={(value) =>
-                    setEditingAthlete((prev: AthleteWithProfile | null) => prev ? {
-                      ...prev,
-                      current_level: value as "beginner" | "intermediate" | "advanced" | "all_levels"
-                    } : null)
-                  }
+                  value={currentLevelValue || "beginner"}
+                  onValueChange={(value) => setValue("current_level", value as "beginner" | "intermediate" | "advanced" | "all_levels")}
                 >
                   <SelectTrigger className="h-11">
                     <SelectValue />
@@ -384,6 +422,25 @@ export default function AthletesPage() {
                 placeholder="Alergias, lesiones, etc."
                 className="h-11"
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="plan_id" className="text-xs text-on_surface_variant uppercase tracking-wider">Plan de membresia</Label>
+              <Select
+                value={planIdValue || ""}
+                onValueChange={(value) => setValue("plan_id", value || undefined)}
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="Seleccionar plan..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {membershipPlans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - ${plan.price.toLocaleString('es-AR')} ({plan.duration_days} dias)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex gap-3 p-6 pt-2">

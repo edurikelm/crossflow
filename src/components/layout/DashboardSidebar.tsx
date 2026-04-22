@@ -47,7 +47,7 @@ interface DashboardSidebarProps {
   userRole: UserRole;
 }
 
-export function DashboardSidebar({ gymName = "Mi Gimnasio", userRole }: DashboardSidebarProps) {
+export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { sidebar, setSidebarCollapsed } = useUIStore();
   const { isCollapsed } = sidebar;

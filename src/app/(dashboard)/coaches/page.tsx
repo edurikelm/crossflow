@@ -17,8 +17,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +54,7 @@ export default function CoachesPage() {
     },
   });
 
-  const specialtyValue = watch("specialty") || [];
+  const specialtyValue = watch("specialty") || []; // eslint-disable-line react-hooks/incompatible-library
 
   const fetchCoaches = useCallback(async () => {
     setIsLoading(true);
@@ -79,11 +77,10 @@ export default function CoachesPage() {
   }, [fetchCoaches]);
 
   const filteredCoaches = coaches.filter((coach) => {
-    const profile = coach.profile as { full_name?: string; email?: string } | undefined;
     return (
       !searchQuery ||
-      profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile?.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      coach.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      coach.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
@@ -128,11 +125,10 @@ export default function CoachesPage() {
   const handleOpenDialog = (coach?: CoachWithProfile) => {
     if (coach) {
       setEditingCoach(coach);
-      const profile = coach.profile as { full_name?: string; email?: string; phone?: string } | undefined;
       reset({
-        full_name: profile?.full_name || "",
-        email: profile?.email || "",
-        phone: profile?.phone || "",
+        full_name: coach.full_name || "",
+        email: coach.email || "",
+        phone: coach.phone || "",
         specialty: coach.specialty || [],
         bio: coach.bio || "",
         hourly_rate: coach.hourly_rate ?? undefined,
@@ -223,10 +219,10 @@ export default function CoachesPage() {
                 return (
                 <TableRow key={coach.id}>
                   <TableCell className="font-medium">
-                    {coach.profile?.full_name || "Sin nombre"}
+                    {coach.full_name || "Sin nombre"}
                   </TableCell>
-                  <TableCell>{coach.profile?.email || "-"}</TableCell>
-                  <TableCell>{coach.profile?.phone || "-"}</TableCell>
+                  <TableCell>{coach.email || "-"}</TableCell>
+                  <TableCell>{coach.phone || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {coach.specialty?.slice(0, 2).map((s) => (
@@ -247,7 +243,7 @@ export default function CoachesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {(coach as unknown as { profiles?: { full_name?: string } })?.profiles?.full_name || "-"}
+                    {coach.created_by?.full_name || "-"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(coach.created_at).toLocaleDateString("es-AR", {

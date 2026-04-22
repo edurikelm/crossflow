@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Search, ChevronDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUIStore } from "@/store";
+import { useUIStore, useAuthStore } from "@/store";
 import type { Profile, Gym } from "@/types";
 import { getInitials } from "@/lib/utils";
 
@@ -24,14 +24,20 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, gym }: DashboardHeaderProps) {
   const { toggleSidebar } = useUIStore();
+  const { setGymId, setUser } = useAuthStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    setGymId(gym?.id ?? null);
+    setUser(user);
+  }, [gym?.id, user, setGymId, setUser]);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-surface border-b border-transparent px-4 lg:px-6">
       <Button
         variant="ghost"
         size="icon"
-        className="text-on_surface_variant hover:text-surface-foreground hover:bg-surface_container_low"
+        className="lg:hidden text-on_surface_variant hover:text-surface-foreground hover:bg-surface_container_low"
         onClick={toggleSidebar}
       >
         <Menu size={20} />

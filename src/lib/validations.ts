@@ -28,6 +28,7 @@ export const athleteSchema = z.object({
     "advanced",
     "all_levels",
   ]).optional(),
+  plan_id: z.string().uuid("Plan inválido").optional().nullable(),
 });
 
 export const athleteFilterSchema = z.object({

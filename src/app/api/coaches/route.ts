@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('coaches')
-    .select('*, profiles(full_name)');
+    .select('*, created_by:profiles!coaches_profile_id_fkey(full_name)');
 
   if (search) {
     query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);

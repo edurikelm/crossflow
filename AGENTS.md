@@ -16,8 +16,8 @@ Note: No `test` or `typecheck` scripts defined in package.json. Add them if need
 
 ## Supabase Backend
 
-- **Project ID**: `gyxjkwzycglhfbmwxbac`
-- **URL**: `https://gyxjkwzycglhfbmwxbac.supabase.co`
+- **Project ID**: `oohcojwplgmmefjmiyle`
+- **URL**: `https://oohcojwplgmmefjmiyle.supabase.co`
 - **Service role key** and **anon key** are in `.env.local` (DO NOT commit)
 
 ### API Testing Scripts

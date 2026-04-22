@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronLeft, ChevronRight, Clock, Users, X, LayoutList, FileText } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Clock, Users, LayoutList, FileText } from "lucide-react";
 import {
   format,
   startOfWeek,
@@ -37,7 +37,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { es } from "date-fns/locale";
-import type { ScheduledClassWithDetails, ClassTemplate, CoachWithProfile } from "@/types";
+import type { ScheduledClassWithDetails, ClassTemplate } from "@/types";
 import { useAuthStore } from "@/store";
 
 type CoachSelect = { id: string; full_name: string };
@@ -113,11 +113,10 @@ export default function CalendarPage() {
   const [scheduledClasses, setScheduledClasses] = useState<ScheduledClassWithDetails[]>([]);
   const [classTemplates, setClassTemplates] = useState<ClassTemplate[]>([]);
   const [coaches, setCoaches] = useState<CoachSelect[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ScheduledClassWithDetails | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<{ date: string; hour: number } | null>(null);
   const [attendees, setAttendees] = useState<AttendeeRow[]>([]);
   const [isLoadingAttendees, setIsLoadingAttendees] = useState(false);
 
@@ -132,6 +131,7 @@ export default function CalendarPage() {
 
   const weekStart = useMemo(() => startOfWeek(currentWeek, { weekStartsOn: 1 }), [currentWeek]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const gymId = useAuthStore((state) => state.gymId);
 
   const fetchData = useCallback(async (week: Date) => {
     setIsLoading(true);
@@ -139,7 +139,7 @@ export default function CalendarPage() {
     const startDate = format(addDays(ws, 0), "yyyy-MM-dd");
     const endDate = format(addDays(ws, 6), "yyyy-MM-dd");
 
-    const gymId = useAuthStore.getState().gymId;
+    const currentGymId = useAuthStore.getState().gymId;
 
     let classesQuery = supabase
       .from("scheduled_classes")
@@ -151,8 +151,8 @@ export default function CalendarPage() {
       .gte("date", startDate)
       .lte("date", endDate);
 
-    if (gymId) {
-      classesQuery = classesQuery.eq("gym_id", gymId);
+    if (currentGymId) {
+      classesQuery = classesQuery.eq("gym_id", currentGymId);
     }
 
     const [classesRes, templatesRes] = await Promise.all([
@@ -161,8 +161,8 @@ export default function CalendarPage() {
     ]);
 
     let coachesRes: { data: CoachSelect[]; error: null } = { data: [], error: null };
-    if (gymId) {
-      const res = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", gymId);
+    if (currentGymId) {
+      const res = await supabase.from("coaches").select("id, full_name").eq("is_active", true).eq("gym_id", currentGymId);
       if (!res.error) coachesRes = { data: res.data as CoachSelect[], error: null };
     }
 
@@ -175,7 +175,7 @@ export default function CalendarPage() {
     if (templatesRes.data) setClassTemplates(templatesRes.data);
     if (coachesRes.data) setCoaches(coachesRes.data);
     setIsLoading(false);
-  }, [supabase]);
+  }, [supabase, gymId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -192,10 +192,6 @@ export default function CalendarPage() {
   const handleNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
 
   const handleSlotClick = (date: Date, hour: number) => {
-    setSelectedSlot({
-      date: format(date, "yyyy-MM-dd"),
-      hour,
-    });
     setFormData({
       class_template_id: "",
       coach_id: "",
@@ -256,7 +252,6 @@ export default function CalendarPage() {
         description="Programación semanal de clases"
         actions={
           <Button onClick={() => {
-            setSelectedSlot(null);
             setFormData({
               class_template_id: "",
               coach_id: "",
@@ -406,15 +401,18 @@ export default function CalendarPage() {
 
       {/* Event Details Dialog */}
       <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-        <DialogContent className="w-full max-w-4xl max-h-[90vh] bg-surface_container_lowest overflow-hidden rounded-lg shadow-2xl shadow-black/80 p-0 flex flex-col">
+        <DialogContent aria-describedby="event-dialog-description" className="w-full max-w-4xl max-h-[90vh] bg-surface_container_lowest overflow-hidden rounded-lg shadow-2xl shadow-black/80 p-0 flex flex-col">
           <DialogTitle className="sr-only">
             {selectedEvent?.class_templates?.name || "Clase"}
           </DialogTitle>
+          <DialogDescription id="event-dialog-description" className="sr-only">
+            Detalles de la clase programada
+          </DialogDescription>
 
           {/* Close Button Top Right */}
           <button
             onClick={() => setIsEventDialogOpen(false)}
-            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer active:scale-90"
+            className="absolute top-4 right-4 z-10 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer active:scale-90"
           >
           </button>
 
@@ -595,12 +593,12 @@ export default function CalendarPage() {
 
       {/* Create Class Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+        <DialogContent aria-describedby="create-class-description" className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
           <div className="p-6 pb-0">
             <DialogTitle className="text-left uppercase tracking-wide">
               Nueva Clase
             </DialogTitle>
-            <DialogDescription className="text-left mt-1">
+            <DialogDescription id="create-class-description" className="text-left mt-1">
               Ingresa los datos de la nueva clase
             </DialogDescription>
           </div>

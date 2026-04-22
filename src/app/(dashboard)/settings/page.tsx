@@ -15,13 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Settings, Save, Plus, Trash2 } from "lucide-react";
 import type { Gym, MembershipPlan } from "@/types";
 
@@ -92,7 +85,7 @@ export default function SettingsPage() {
     };
 
     fetchData();
-  }, []);
+  }, [supabase]);
 
   const handleSaveGym = async () => {
     if (!gym) return;
