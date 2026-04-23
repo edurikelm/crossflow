@@ -29,7 +29,7 @@
   --color-on_surface_variant: hsl(240 5% 65%);
 
   --font-display: "Space Grotesk", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   --radius-sm: 0.125rem;
   --radius-md: 0.25rem;
@@ -38,7 +38,7 @@
 body {
   background: var(--color-surface);
   color: var(--color-surface-foreground);
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
