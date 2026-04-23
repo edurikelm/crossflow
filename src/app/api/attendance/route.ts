@@ -119,3 +119,73 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const supabase = await createClient();
+
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, gym_id')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const booking_id = searchParams.get('booking_id');
+
+    if (!booking_id) {
+      return NextResponse.json({ error: 'booking_id is required' }, { status: 400 });
+    }
+
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select('id, scheduled_class_id, athlete_id, gym_id')
+      .eq('id', booking_id)
+      .single();
+
+    if (bookingError || !booking) {
+      return NextResponse.json({ error: 'Reservación no encontrada' }, { status: 404 });
+    }
+
+    if (booking.gym_id !== profile.gym_id) {
+      return NextResponse.json({ error: 'No tienes permiso para eliminar esta reservación' }, { status: 403 });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('id', booking_id);
+
+    if (deleteError) {
+      console.error('Booking delete error:', deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 400 });
+    }
+
+    const { data: classData } = await supabase
+      .from('scheduled_classes')
+      .select('current_bookings')
+      .eq('id', booking.scheduled_class_id)
+      .single();
+
+    if (classData && classData.current_bookings > 0) {
+      await supabase
+        .from('scheduled_classes')
+        .update({ current_bookings: classData.current_bookings - 1 })
+        .eq('id', booking.scheduled_class_id);
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (e) {
+    console.error('Booking DELETE error:', e);
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
+}

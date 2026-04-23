@@ -295,6 +295,15 @@ export default function CalendarPage() {
           `)
           .eq("scheduled_class_id", selectedEvent.id);
         setAttendees((refreshData as AttendeeRow[]) ?? []);
+        if (selectedEvent) {
+          setScheduledClasses((prev) =>
+            prev.map((cls) =>
+              cls.id === selectedEvent.id
+                ? { ...cls, current_bookings: (cls.current_bookings || 0) + selectedAthleteIds.length }
+                : cls
+            )
+          );
+        }
       } else {
         const error = await res.json();
         console.error("Error adding athletes:", error);
@@ -303,6 +312,42 @@ export default function CalendarPage() {
       console.error("Error adding athletes:", error);
     } finally {
       setIsAddingAthletes(false);
+    }
+  };
+
+  const handleRemoveAthlete = async (bookingId: string) => {
+    try {
+      const res = await fetch(`/api/attendance?booking_id=${bookingId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok && selectedEvent) {
+        const { data: refreshData } = await supabase
+          .from("bookings")
+          .select(`
+            id,
+            athlete_id,
+            status,
+            athletes(
+              id,
+              profile:profiles(id, full_name, email),
+              memberships(status, end_date, plan:membership_plans(name))
+            )
+          `)
+          .eq("scheduled_class_id", selectedEvent.id);
+        setAttendees((refreshData as AttendeeRow[]) ?? []);
+        setScheduledClasses((prev) =>
+          prev.map((cls) =>
+            cls.id === selectedEvent.id
+              ? { ...cls, current_bookings: Math.max(0, (cls.current_bookings || 0) - 1) }
+              : cls
+          )
+        );
+      } else {
+        const error = await res.json();
+        console.error("Error removing athlete:", error);
+      }
+    } catch (error) {
+      console.error("Error removing athlete:", error);
     }
   };
 
@@ -503,7 +548,7 @@ export default function CalendarPage() {
                           )}
                           <div className="flex items-center justify-between">
                             <span className={cn("font-mono text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase", isActive ? "bg-white/20 text-white" : "bg-surface_container_lowest text-secondary")}>
-                              {(cls.capacity ?? 0) - (cls.spots_remaining ?? 0)}/{cls.capacity ?? 0}
+                              {cls.current_bookings ?? 0}/{cls.capacity ?? 0}
                             </span>
                             <span className={cn("font-mono text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase", badge.className, isActive && "bg-white/20 text-white")}>
                               {badge.label}
@@ -672,6 +717,7 @@ export default function CalendarPage() {
                         <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-widest uppercase">NOMBRE</th>
                         <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-widest uppercase">MEMBRESÍA</th>
                         <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-widest uppercase">ESTADO</th>
+                        <th className="px-4 py-3 text-[10px] font-bold text-neutral-500 tracking-widest uppercase text-center">ACCIÓN</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-900/50">
@@ -693,6 +739,18 @@ export default function CalendarPage() {
                               <span className={`px-2 py-0.5 text-[9px] font-black rounded-sm uppercase ${getStatusStyle(booking.status)}`}>
                                 {booking.status?.replace(/_/g, " ") || "PENDIENTE"}
                               </span>
+                            </td>
+                            <td className="px-4 py-4 text-center">
+                              <button
+                                onClick={() => handleRemoveAthlete(booking.id)}
+                                className="text-red-400 hover:text-red-300 transition-colors p-1"
+                                title="Eliminar atleta"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                              </button>
                             </td>
                           </tr>
                         );
@@ -797,6 +855,7 @@ export default function CalendarPage() {
                       <Checkbox
                         checked={selectedAthleteIds.includes(athlete.id)}
                         onCheckedChange={() => handleToggleAthlete(athlete.id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-white truncate">
