@@ -63,12 +63,12 @@ export async function GET(request: NextRequest) {
 
     let excludeIds: string[] = [];
     if (scheduled_class_id) {
-      const { data: existingAttendees } = await supabase
-        .from('attendance')
+      const { data: existingBookings } = await supabase
+        .from('bookings')
         .select('athlete_id')
         .eq('scheduled_class_id', scheduled_class_id);
 
-      excludeIds = (existingAttendees || []).map(a => a.athlete_id);
+      excludeIds = (existingBookings || []).map(b => b.athlete_id);
     }
 
     const filteredAthletes = availableAthletes.filter(

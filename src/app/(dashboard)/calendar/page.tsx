@@ -43,8 +43,16 @@ interface AttendeeRow {
   status: string;
   athletes?: {
     id?: string;
-    full_name?: string;
-    membership_plans?: { name?: string } | null;
+    profile?: {
+      id?: string;
+      full_name?: string;
+      email?: string;
+    };
+    memberships?: Array<{
+      status: string;
+      end_date: string;
+      plan: { name?: string } | null;
+    }> | null;
   } | null;
 }
 
@@ -203,10 +211,22 @@ export default function CalendarPage() {
     setAttendees([]);
     setIsEventDialogOpen(true);
     setIsLoadingAttendees(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("bookings")
-      .select("id, athlete_id, status, athletes(id, full_name, membership_plans(name))")
+      .select(`
+        id,
+        athlete_id,
+        status,
+        athletes(
+          id,
+          profile:profiles(id, full_name, email),
+          memberships(status, end_date, plan:membership_plans(name))
+        )
+      `)
       .eq("scheduled_class_id", cls.id);
+    if (error) {
+      console.error("Error fetching bookings:", error);
+    }
     setAttendees((data as AttendeeRow[]) ?? []);
     setIsLoadingAttendees(false);
   };
@@ -261,11 +281,20 @@ export default function CalendarPage() {
       if (res.ok) {
         setSelectedAthleteIds([]);
         setIsAddAthleteDialogOpen(false);
-        const { data } = await supabase
+        const { data: refreshData } = await supabase
           .from("bookings")
-          .select("id, athlete_id, status, athletes(id, full_name, membership_plans(name))")
+          .select(`
+            id,
+            athlete_id,
+            status,
+            athletes(
+              id,
+              profile:profiles(id, full_name, email),
+              memberships(status, end_date, plan:membership_plans(name))
+            )
+          `)
           .eq("scheduled_class_id", selectedEvent.id);
-        setAttendees((data as AttendeeRow[]) ?? []);
+        setAttendees((refreshData as AttendeeRow[]) ?? []);
       } else {
         const error = await res.json();
         console.error("Error adding athletes:", error);
@@ -646,20 +675,23 @@ export default function CalendarPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-900/50">
-                      {attendees.map((athlete) => {
-                        const planName = athlete.athletes?.membership_plans?.name;
+                      {attendees.map((booking) => {
+                        const athlete = booking.athletes;
+                        const profile = athlete?.profile;
+                        const membership = athlete?.memberships?.[0];
+                        const planName = membership?.plan?.name;
                         return (
-                          <tr key={athlete.id} className="hover:bg-surface_container_low transition-colors">
-                            <td className="px-4 py-4 text-xs font-mono text-neutral-400">#{athlete.athlete_id?.slice(0, 6) || "N/A"}</td>
-                            <td className="px-4 py-4 text-sm font-bold text-white">{athlete.athletes?.full_name || "Atleta"}</td>
+                          <tr key={booking.id} className="hover:bg-surface_container_low transition-colors">
+                            <td className="px-4 py-4 text-xs font-mono text-neutral-400">#{booking.athlete_id?.slice(0, 6) || "N/A"}</td>
+                            <td className="px-4 py-4 text-sm font-bold text-white">{profile?.full_name || "Atleta"}</td>
                             <td className="px-4 py-4">
                               <span className={`px-2 py-0.5 text-[9px] font-black rounded-sm uppercase ${getMembershipStyle(planName)}`}>
                                 {planName || "ESTÁNDAR"}
                               </span>
                             </td>
                             <td className="px-4 py-4">
-                              <span className={`px-2 py-0.5 text-[9px] font-black rounded-sm uppercase ${getStatusStyle(athlete.status)}`}>
-                                {athlete.status?.replace(/_/g, " ") || "PENDIENTE"}
+                              <span className={`px-2 py-0.5 text-[9px] font-black rounded-sm uppercase ${getStatusStyle(booking.status)}`}>
+                                {booking.status?.replace(/_/g, " ") || "PENDIENTE"}
                               </span>
                             </td>
                           </tr>
