@@ -7,12 +7,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Dev Commands
 
 ```bash
-npm run dev      # Start dev server (http://localhost:3000)
-npm run build    # Production build
-npm run lint     # ESLint
+npm run dev         # Start dev server (http://localhost:3000)
+npm run build       # Production build
+npm run lint        # ESLint (flat config, see eslint.config.mjs)
+npm run test        # Run vitest tests
+npm run test:watch  # Vitest in watch mode
 ```
-
-Note: No `test` or `typecheck` scripts defined in package.json. Add them if needed.
 
 ## Supabase Backend
 
@@ -20,24 +20,21 @@ Note: No `test` or `typecheck` scripts defined in package.json. Add them if need
 - **URL**: `https://oohcojwplgmmefjmiyle.supabase.co`
 - **Service role key** and **anon key** are in `.env.local` (DO NOT commit)
 
-### API Testing Scripts
+## Environment Setup
 
-```powershell
-.\check_all.ps1   # GET gyms + class_templates
-.\check_api.ps1    # GET membership_plans
-```
+Copy `.env.example` to `.env.local` and fill in Supabase credentials before running.
 
-### Database Migrations
+## Database Migrations
 
 Migrations live in `supabase/migrations/`. Run via Supabase CLI:
 ```bash
 npx supabase migration run
 ```
 
-### User Management
+## User Management
 
 ```bash
-node create-user.js     # Create admin user via Supabase Auth API
+node create-user.js     # Create admin user via Supabase Auth API (uses hardcoded service role key)
 ```
 
 ## Architecture
@@ -54,6 +51,28 @@ node create-user.js     # Create admin user via Supabase Auth API
 
 RLS enabled on all tables. Service role key bypasses RLS for admin scripts.
 
-## Environment
+## Auth Proxy
 
-Copy `.env.example` to `.env.local` and fill in Supabase credentials before running.
+All requests pass through `src/proxy.ts` which handles Supabase SSR cookie auth and redirects unauthenticated users to `/login`. Public routes: `/login`, `/forgot-password`, `/reset-password`.
+
+## Tailwind CSS
+
+v4 with `@tailwindcss/postcss` — no `tailwind.config.js` needed (config is in CSS).
+
+## Agent skills
+
+### Issue tracker
+
+GitHub issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` at repo root + `docs/adr/`. See `docs/agents/domain.md`.
+
+## Supabase SSR Cookie Pattern
+
+Use `@supabase/ssr` `createServerClient` for Server Components and Route Handlers. Use `@supabase/supabase-js` `createClient` for client-side only.

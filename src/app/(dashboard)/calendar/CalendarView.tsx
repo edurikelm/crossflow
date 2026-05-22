@@ -133,6 +133,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
   const [athleteSearchQuery, setAthleteSearchQuery] = useState("");
   const [isLoadingAthletes, setIsLoadingAthletes] = useState(false);
   const [isAddingAthletes, setIsAddingAthletes] = useState(false);
+  const [addAthleteError, setAddAthleteError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     class_template_id: "",
@@ -141,7 +142,12 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
     start_time: "",
     end_time: "",
     notes: "",
+    capacity: "",
   });
+  const [isEditingClass, setIsEditingClass] = useState(false);
+  const [editingClassId, setEditingClassId] = useState<string | null>(null);
+  const [isSubmittingClass, setIsSubmittingClass] = useState(false);
+  const [isDeletingClass, setIsDeletingClass] = useState(false);
 
   const weekStart = useMemo(() => startOfWeek(currentWeek, { weekStartsOn: 1 }), [currentWeek]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
@@ -263,6 +269,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
   const handleOpenAddAthleteDialog = () => {
     setSelectedAthleteIds([]);
     setAthleteSearchQuery("");
+    setAddAthleteError(null);
     fetchAvailableAthletes();
     setIsAddAthleteDialogOpen(true);
   };
@@ -308,17 +315,21 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
           setScheduledClasses((prev) =>
             prev.map((cls) =>
               cls.id === selectedEvent.id
-                ? { ...cls, current_bookings: (cls.current_bookings || 0) + selectedAthleteIds.length }
+                ? {
+                    ...cls,
+                    current_bookings: (cls.current_bookings || 0) + selectedAthleteIds.length,
+                    spots_remaining: Math.max(0, (cls.spots_remaining || 0) - selectedAthleteIds.length),
+                  }
                 : cls
             )
           );
         }
       } else {
         const error = await res.json();
-        console.error("Error adding athletes:", error);
+        setAddAthleteError(error.error || "Error al agregar atletas");
       }
-    } catch (error) {
-      console.error("Error adding athletes:", error);
+    } catch {
+      setAddAthleteError("Error al agregar atletas");
     } finally {
       setIsAddingAthletes(false);
     }
@@ -347,7 +358,11 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
         setScheduledClasses((prev) =>
           prev.map((cls) =>
             cls.id === selectedEvent.id
-              ? { ...cls, current_bookings: Math.max(0, (cls.current_bookings || 0) - 1) }
+              ? {
+                  ...cls,
+                  current_bookings: Math.max(0, (cls.current_bookings || 0) - 1),
+                  spots_remaining: (cls.spots_remaining || 0) + 1,
+                }
               : cls
           )
         );
@@ -362,31 +377,94 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
 
   const handleSubmit = async () => {
     if (!formData.class_template_id || !formData.coach_id) return;
+    setIsSubmittingClass(true);
 
     const template = classTemplates.find(t => t.id === formData.class_template_id);
     const endHour = parseInt(formData.start_time.split(":")[0]) + (template?.duration_minutes || 60) / 60;
 
-    const res = await fetch("/api/scheduled_classes", {
-      method: "POST",
+    const body: Record<string, unknown> = {
+      class_template_id: formData.class_template_id,
+      coach_id: formData.coach_id,
+      date: formData.date,
+      start_time: formData.start_time,
+      end_time: `${Math.floor(endHour).toString().padStart(2, "0")}:${((endHour % 1) * 60).toString().padStart(2, "0")}`,
+      notes: formData.notes,
+    };
+
+    if (formData.capacity) {
+      body.capacity = parseInt(formData.capacity);
+    }
+
+    const url = isEditingClass && editingClassId
+      ? `/api/scheduled_classes/${editingClassId}`
+      : "/api/scheduled_classes";
+    const method = isEditingClass && editingClassId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        class_template_id: formData.class_template_id,
-        coach_id: formData.coach_id,
-        date: formData.date,
-        start_time: formData.start_time,
-        end_time: `${Math.floor(endHour).toString().padStart(2, "0")}:${((endHour % 1) * 60).toString().padStart(2, "0")}`,
-        notes: formData.notes,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error("Error creating class:", errorData);
+      console.error("Error saving class:", errorData);
+      setIsSubmittingClass(false);
       return;
     }
 
     setIsDialogOpen(false);
+    setIsEditingClass(false);
+    setEditingClassId(null);
+    resetForm();
     fetchData(currentWeek);
+    setIsSubmittingClass(false);
+  };
+
+  const handleEditClass = () => {
+    if (!selectedEvent) return;
+    setIsEditingClass(true);
+    setEditingClassId(selectedEvent.id);
+    setFormData({
+      class_template_id: selectedEvent.class_template_id || "",
+      coach_id: selectedEvent.coach_id || "",
+      date: selectedEvent.date,
+      start_time: selectedEvent.start_time || "",
+      end_time: selectedEvent.end_time || "",
+      notes: selectedEvent.notes || "",
+      capacity: selectedEvent.capacity ? String(selectedEvent.capacity) : "",
+    });
+    setIsEventDialogOpen(false);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteClass = async () => {
+    if (!selectedEvent || !confirm("¿Estás seguro de eliminar esta clase?")) return;
+    setIsDeletingClass(true);
+
+    const res = await fetch(`/api/scheduled_classes/${selectedEvent.id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setIsEventDialogOpen(false);
+      fetchData(currentWeek);
+    } else {
+      console.error("Error deleting class");
+    }
+    setIsDeletingClass(false);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      class_template_id: "",
+      coach_id: "",
+      date: "",
+      start_time: "",
+      end_time: "",
+      notes: "",
+      capacity: "",
+    });
   };
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -464,6 +542,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
               start_time: "09:00",
               end_time: "10:00",
               notes: "",
+              capacity: "",
             });
             setIsDialogOpen(true);
           }}>
@@ -588,6 +667,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
                     start_time: "09:00",
                     end_time: "10:00",
                     notes: "",
+                    capacity: "",
                   });
                   setIsDialogOpen(true);
                 }}
@@ -604,11 +684,11 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
       </div>
 
       <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-        <DialogContent aria-describedby="event-dialog-description" className="w-full max-w-4xl max-h-[90vh] bg-surface_container_lowest overflow-hidden rounded-lg shadow-2xl shadow-black/80 p-0 flex flex-col">
+        <DialogContent className="w-full max-w-4xl max-h-[90vh] bg-surface_container_lowest overflow-hidden rounded-lg shadow-2xl shadow-black/80 p-0 flex flex-col">
           <DialogTitle className="sr-only">
             {selectedEvent?.class_templates?.name || "Clase"}
           </DialogTitle>
-          <DialogDescription id="event-dialog-description" className="sr-only">
+          <DialogDescription className="sr-only">
             Detalles de la clase programada
           </DialogDescription>
 
@@ -791,7 +871,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
 
           <div className="p-6 bg-surface_container_lowest shrink-0 flex justify-end items-center gap-4">
             <button
-              onClick={() => setIsEventDialogOpen(false)}
+              onClick={handleEditClass}
               className="px-6 py-2.5 text-xs font-bold text-neutral-400 border border-neutral-800 rounded hover:text-white hover:border-neutral-600 transition-all uppercase tracking-widest font-display active:scale-95"
             >
               EDITAR CLASE
@@ -817,6 +897,16 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
             </DialogDescription>
           </div>
           <div className="px-6 pb-4 space-y-4">
+            {selectedEvent && selectedEvent.spots_remaining === 0 && (
+              <div className="bg-error-container/20 border border-error/30 rounded-md p-3 text-sm text-error">
+                Esta clase no tiene cupos disponibles
+              </div>
+            )}
+            {addAthleteError && (
+              <div className="bg-error-container/20 border border-error/30 rounded-md p-3 text-sm text-error">
+                {addAthleteError}
+              </div>
+            )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
               <Input
@@ -832,7 +922,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
                 }}
               />
             </div>
-            <ScrollArea className="h-[300px] rounded-md border border-neutral-800">
+            <ScrollArea className="h-75 rounded-md border border-neutral-800">
               {isLoadingAthletes ? (
                 <div className="p-4 text-center text-neutral-500 text-sm">
                   Cargando atletas...
@@ -884,7 +974,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
               <Button
                 className="flex-1 h-11"
                 onClick={handleAddAthletes}
-                disabled={selectedAthleteIds.length === 0 || isAddingAthletes}
+                disabled={selectedAthleteIds.length === 0 || isAddingAthletes || (selectedEvent?.spots_remaining ?? 1) === 0}
               >
                 {isAddingAthletes ? "Agregando..." : `Agregar (${selectedAthleteIds.length})`}
               </Button>
@@ -894,12 +984,12 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
       </Dialog>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent aria-describedby="create-class-description" className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
+        <DialogContent className="w-full max-w-md bg-surface_container_low rounded-md p-0 overflow-hidden">
           <div className="p-6 pb-0">
             <DialogTitle className="text-left uppercase tracking-wide">
-              Nueva Clase
+              {isEditingClass ? "Editar Clase" : "Nueva Clase"}
             </DialogTitle>
-            <DialogDescription id="create-class-description" className="text-left mt-1">
+            <DialogDescription className="text-left mt-1">
               Ingresa los datos de la nueva clase
             </DialogDescription>
           </div>
@@ -948,7 +1038,7 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
               </Select>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5 col-span-1">
                 <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Fecha</Label>
                 <Input
@@ -957,6 +1047,25 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
                   className="h-11"
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Cupos</Label>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={formData.capacity}
+                  className="h-11"
+                  min={1}
+                  max={100}
+                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5 col-span-1">
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Inicio</Label>
@@ -990,20 +1099,36 @@ export function CalendarView({ initialClasses, initialTemplates, initialCoaches,
             </div>
 
             <div className="flex gap-3 pt-2">
+              {isEditingClass && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="h-11"
+                  onClick={handleDeleteClass}
+                  disabled={isDeletingClass}
+                >
+                  {isDeletingClass ? "Eliminando..." : "Eliminar"}
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
                 className="flex-1 h-11"
-                onClick={() => setIsDialogOpen(false)}
+                onClick={() => {
+                  setIsDialogOpen(false);
+                  setIsEditingClass(false);
+                  setEditingClassId(null);
+                  resetForm();
+                }}
               >
                 Cancelar
               </Button>
               <Button
                 className="flex-1 h-11"
                 onClick={handleSubmit}
-                disabled={!formData.class_template_id || !formData.coach_id}
+                disabled={!formData.class_template_id || !formData.coach_id || isSubmittingClass}
               >
-                Guardar
+                {isSubmittingClass ? "Guardando..." : "Guardar"}
               </Button>
             </div>
           </div>

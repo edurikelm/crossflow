@@ -33,11 +33,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, Search, Pencil, Trash2 } from "lucide-react";
-import type { AthleteWithProfile, MembershipPlan } from "@/types";
+import { MoreHorizontal, Plus, Search, Pencil, Trash2, Info } from "lucide-react";
+import type { AthleteWithProfile, MembershipPlan, AthleteStatusOverride } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { athleteSchema, type AthleteInput } from "@/lib/validations";
+import { computeAthleteStatus, getBadgeVariantForStatus } from "@/lib/athletes";
 
 interface AthletesViewProps {
   initialAthletes: AthleteWithProfile[];
@@ -52,6 +53,19 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAthlete, setEditingAthlete] = useState<AthleteWithProfile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState("");
+  const [pendingStatusChange, setPendingStatusChange] = useState<{
+    athlete: AthleteWithProfile;
+    newOverride: AthleteStatusOverride | null;
+    step: 'confirm' | 'trial_date';
+  } | null>(null);
+  const [trialDateValue, setTrialDateValue] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    athleteId: string;
+    oldOverride: AthleteStatusOverride | null;
+    oldTrialEndsAt: string | null;
+  } | null>(null);
 
   const {
     register,
@@ -75,8 +89,7 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.set("search", searchQuery);
-      if (statusFilter === "active") params.set("status", "active");
-      else if (statusFilter === "inactive") params.set("status", "expired");
+      if (statusFilter !== "all") params.set("status", statusFilter);
 
       const res = await fetch(`/api/athletes${params.toString() ? `?${params}` : ""}`);
       if (res.ok) {
@@ -92,10 +105,19 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
     setIsSubmitting(true);
     try {
       if (editingAthlete) {
+        const body: Record<string, unknown> = { ...data };
+        if (data.plan_id) {
+          if (editingAthlete.status_override === "trial" || editingAthlete.status_override === "paused") {
+            body.status_override = null;
+          }
+        }
+        if (editingAthlete.status_override === "trial" && trialEndsAt) {
+          body.trial_ends_at = trialEndsAt;
+        }
         const res = await fetch(`/api/athletes/${editingAthlete.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error("Failed to update athlete");
       } else {
@@ -110,6 +132,7 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
       reset();
       setIsDialogOpen(false);
       setEditingAthlete(null);
+      setTrialEndsAt("");
       fetchAthletes();
     } catch (error) {
       console.error("Error saving athlete:", error);
@@ -133,6 +156,7 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
         current_level: athlete.current_level,
         plan_id: membership?.plan?.id || undefined,
       });
+      setTrialEndsAt(athlete.trial_ends_at || "");
     } else {
       setEditingAthlete(null);
       reset({
@@ -145,6 +169,9 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
         current_level: "beginner",
         plan_id: undefined,
       });
+      const future = new Date();
+      future.setDate(future.getDate() + 7);
+      setTrialEndsAt(future.toISOString().split("T")[0]);
     }
     setIsDialogOpen(true);
   };
@@ -156,14 +183,126 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
     }
   };
 
-  const getStatusBadge = (athlete: AthleteWithProfile, membership?: { status?: string }) => {
-    if (!athlete.is_active) {
-      return <Badge variant="secondary">Inactivo</Badge>;
+  const getStatusLabel = (override: AthleteStatusOverride | null) => {
+    switch (override) {
+      case null: return "Activo";
+      case "trial": return "Prueba";
+      case "paused": return "Pausado";
+      case "suspended": return "Suspendido";
+      case "inactive": return "Inactivo";
+      default: return "-";
     }
-    if (membership?.status === "active") {
-      return <Badge variant="success">Activo</Badge>;
+  };
+
+  const handleStatusChange = async (
+    athlete: AthleteWithProfile,
+    newOverride: AthleteStatusOverride | null,
+    trialEndsAt: string | null,
+  ) => {
+    const oldOverride = athlete.status_override;
+    const oldTrialEndsAt = athlete.trial_ends_at;
+
+    setAthletes(prev => prev.map(a => a.id === athlete.id ? {
+      ...a,
+      status_override: newOverride,
+      trial_ends_at: trialEndsAt,
+      computed_status: computeAthleteStatus({
+        ...a,
+        status_override: newOverride,
+        trial_ends_at: trialEndsAt,
+      }, a.membership?.[0]),
+    } : a));
+
+    try {
+      const res = await fetch(`/api/athletes/${athlete.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status_override: newOverride, trial_ends_at: trialEndsAt }),
+      });
+
+      if (!res.ok) {
+        setAthletes(prev => prev.map(a => a.id === athlete.id ? {
+          ...a,
+          status_override: oldOverride,
+          trial_ends_at: oldTrialEndsAt,
+          computed_status: computeAthleteStatus({
+            ...a,
+            status_override: oldOverride,
+            trial_ends_at: oldTrialEndsAt,
+          }, a.membership?.[0]),
+        } : a));
+        return;
+      }
+
+      setToast({
+        message: `Estado cambiado a ${getStatusLabel(newOverride)}`,
+        athleteId: athlete.id,
+        oldOverride,
+        oldTrialEndsAt,
+      });
+    } catch {
+      setAthletes(prev => prev.map(a => a.id === athlete.id ? {
+        ...a,
+        status_override: oldOverride,
+        trial_ends_at: oldTrialEndsAt,
+        computed_status: computeAthleteStatus({
+          ...a,
+          status_override: oldOverride,
+          trial_ends_at: oldTrialEndsAt,
+        }, a.membership?.[0]),
+      } : a));
     }
-    return <Badge variant="warning">Vencido</Badge>;
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!pendingStatusChange) return;
+    const { athlete, newOverride, step } = pendingStatusChange;
+    setPendingStatusChange(null);
+    if (step === 'trial_date') {
+      await handleStatusChange(athlete, newOverride, trialDateValue);
+    } else {
+      await handleStatusChange(athlete, newOverride, athlete.trial_ends_at);
+    }
+  };
+
+  const handleUndo = async () => {
+    if (!toast) return;
+    const athlete = athletes.find(a => a.id === toast.athleteId);
+    if (!athlete) return;
+    await handleStatusChange(athlete, toast.oldOverride, toast.oldTrialEndsAt);
+    setToast(null);
+  };
+
+  const getStatusBadge = (athlete: AthleteWithProfile) => {
+    const status = athlete.computed_status || computeAthleteStatus(athlete);
+    const labels: Record<string, string> = {
+      active: "Activo",
+      trial: "Prueba",
+      expired: "Vencido",
+      paused: "Pausado",
+      suspended: "Suspendido",
+      inactive: "Inactivo",
+    };
+    return <Badge variant={getBadgeVariantForStatus(status) as "success" | "warning" | "secondary" | "destructive"}>{labels[status] || "-"}</Badge>;
+  };
+
+  const getRemainingDays = (membership?: { end_date?: string }) => {
+    if (!membership?.end_date) return "-";
+    const now = new Date();
+    const end = new Date(membership.end_date);
+    const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const diffMs = endDate.getTime() - nowDate.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return "Vencido";
+    if (diffDays === 0) return "Hoy";
+    return `${diffDays} días`;
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   const filteredAthletes = athletes.filter((athlete) => {
@@ -173,10 +312,11 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
       profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       profile?.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
+    const status = athlete.computed_status || computeAthleteStatus(athlete);
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "active" && athlete.is_active) ||
-      (statusFilter === "inactive" && !athlete.is_active);
+      (statusFilter === "active" && (status === "active" || status === "trial")) ||
+      status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -211,6 +351,10 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="trial">En prueba</SelectItem>
+            <SelectItem value="paused">Pausados</SelectItem>
+            <SelectItem value="suspended">Suspendidos</SelectItem>
+            <SelectItem value="expired">Vencidos</SelectItem>
             <SelectItem value="inactive">Inactivos</SelectItem>
           </SelectContent>
         </Select>
@@ -225,6 +369,9 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
               <TableHead>Teléfono</TableHead>
               <TableHead>Plan</TableHead>
               <TableHead>Precio</TableHead>
+              <TableHead>Tiempo restante</TableHead>
+              <TableHead>Inicio</TableHead>
+              <TableHead>Término</TableHead>
               <TableHead>Nivel</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="w-[70px]">Acciones</TableHead>
@@ -233,7 +380,7 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
           <TableBody>
             {filteredAthletes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={11} className="text-center py-8">
                   No se encontraron atletas
                 </TableCell>
               </TableRow>
@@ -255,10 +402,39 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
                     <TableCell>
                       {plan ? `$${plan.price.toLocaleString('es-AR')}` : "-"}
                     </TableCell>
+                    <TableCell>{getRemainingDays(membership)}</TableCell>
+                    <TableCell>{formatDate(membership?.start_date)}</TableCell>
+                    <TableCell>{formatDate(membership?.end_date)}</TableCell>
                     <TableCell className="capitalize">
                       {athlete.current_level?.replace("_", " ") || "N/A"}
                     </TableCell>
-                    <TableCell>{getStatusBadge(athlete, membership)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <span className="cursor-pointer">{getStatusBadge(athlete)}</span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => handleStatusChange(athlete, null, null)}>
+                            Activo (automático)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            setTrialDateValue(athlete.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]);
+                            setPendingStatusChange({ athlete, newOverride: "trial", step: 'trial_date' });
+                          }}>
+                            En prueba
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(athlete, "paused", athlete.trial_ends_at)}>
+                            Pausado
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(athlete, "suspended", athlete.trial_ends_at)}>
+                            Suspendido
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setPendingStatusChange({ athlete, newOverride: "inactive", step: 'confirm' })}>
+                            Inactivo
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -395,6 +571,36 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
               />
             </div>
 
+            {editingAthlete && (
+              <div className="flex items-center gap-2 p-3 rounded-md bg-surface_container_low">
+                <span className="text-xs text-on_surface_variant uppercase tracking-wider">Estado:</span>
+                {getStatusBadge(editingAthlete)}
+              </div>
+            )}
+
+            {!editingAthlete && (
+              <div className="flex items-start gap-2 p-3 rounded-md bg-surface_container_low">
+                <Info className="h-4 w-4 text-on_surface_variant mt-0.5 shrink-0" />
+                <p className="text-xs text-on_surface_variant">
+                  Los nuevos atletas comienzan con estado de <strong>prueba</strong> por 7 días.
+                  Al asignar un plan de membresía, pasarán automáticamente a activos.
+                </p>
+              </div>
+            )}
+
+            {editingAthlete && editingAthlete.status_override === "trial" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="trial_ends_at" className="text-xs text-on_surface_variant uppercase tracking-wider">Fin del periodo de prueba</Label>
+                <Input
+                  id="trial_ends_at"
+                  type="date"
+                  value={trialEndsAt}
+                  onChange={(e) => setTrialEndsAt(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <Label htmlFor="plan_id" className="text-xs text-on_surface_variant uppercase tracking-wider">Plan de membresia</Label>
               <Select
@@ -434,6 +640,65 @@ export function AthletesView({ initialAthletes, initialPlans }: AthletesViewProp
           </form>
         </DialogContent>
       </Dialog>
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-md bg-surface_container_high px-4 py-3 shadow-lg">
+          <span className="text-sm">{toast.message}</span>
+          <button
+            onClick={handleUndo}
+            className="text-sm font-semibold text-primary underline"
+          >
+            Deshacer
+          </button>
+        </div>
+      )}
+
+      {pendingStatusChange && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setPendingStatusChange(null)}>
+          <div className="mx-4 w-full max-w-sm rounded-md bg-surface_container_low p-6" onClick={(e) => e.stopPropagation()}>
+            {pendingStatusChange.step === 'confirm' ? (
+              <>
+                <h3 className="mb-2 text-lg font-bold">Confirmar cambio</h3>
+                <p className="text-sm">
+                  ¿Estás seguro de marcar a {pendingStatusChange.athlete.profile?.full_name || "este atleta"} como inactivo?
+                </p>
+                <p className="mt-1 text-xs text-on_surface_variant">
+                  Este atleta no podrá reservar clases.
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setPendingStatusChange(null)}>
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" className="flex-1" onClick={handleConfirmStatusChange}>
+                    Confirmar
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="mb-2 text-lg font-bold">Fecha de fin de prueba</h3>
+                <div className="space-y-1.5">
+                  <Label className="text-xs uppercase tracking-wider">Fecha de término</Label>
+                  <Input
+                    type="date"
+                    value={trialDateValue}
+                    onChange={(e) => setTrialDateValue(e.target.value)}
+                    className="mt-1 h-11"
+                  />
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setPendingStatusChange(null)}>
+                    Cancelar
+                  </Button>
+                  <Button className="flex-1" onClick={handleConfirmStatusChange}>
+                    Confirmar
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

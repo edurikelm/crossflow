@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireAuth } from '@/lib/auth/requireAuth';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -28,24 +29,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient();
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) return auth;
+  const supabase = auth.supabase;
+  const profile = auth.profile;
 
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, gym_id')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile) {
-      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
-    }
-
     const body = await request.json();
     const { scheduled_class_id, athlete_ids } = body;
 
@@ -104,16 +93,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    const { error: updateError } = await supabase
+    const { data: updatedClass, error: updateError } = await supabase
       .from('scheduled_classes')
       .update({ current_bookings: (scheduledClass.current_bookings || 0) + newAthleteIds.length })
-      .eq('id', scheduled_class_id);
+      .eq('id', scheduled_class_id)
+      .select('current_bookings')
+      .single();
 
-    if (updateError) {
+    if (updateError || !updatedClass) {
       console.error('Error updating current_bookings:', updateError);
+      return NextResponse.json({ error: 'Error al actualizar contador de clase' }, { status: 500 });
     }
 
-    return NextResponse.json({ data, added: newAthleteIds.length }, { status: 201 });
+    return NextResponse.json({ data, added: newAthleteIds.length, current_bookings: updatedClass.current_bookings }, { status: 201 });
   } catch (e) {
     console.error('Booking POST error:', e);
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
@@ -121,24 +113,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createClient();
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) return auth;
+  const supabase = auth.supabase;
+  const profile = auth.profile;
 
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, gym_id')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !profile) {
-      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
-    }
-
     const { searchParams } = new URL(request.url);
     const booking_id = searchParams.get('booking_id');
 
@@ -170,17 +150,29 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: deleteError.message }, { status: 400 });
     }
 
-    const { data: classData } = await supabase
+    const { data: classData, error: classError } = await supabase
       .from('scheduled_classes')
       .select('current_bookings')
       .eq('id', booking.scheduled_class_id)
       .single();
 
-    if (classData && classData.current_bookings > 0) {
-      await supabase
+    if (classError || !classData) {
+      console.error('Error fetching class for counter update:', classError);
+      return NextResponse.json({ error: 'Error al actualizar contador de clase' }, { status: 500 });
+    }
+
+    if (classData.current_bookings > 0) {
+      const { error: decrementError } = await supabase
         .from('scheduled_classes')
         .update({ current_bookings: classData.current_bookings - 1 })
-        .eq('id', booking.scheduled_class_id);
+        .eq('id', booking.scheduled_class_id)
+        .select('current_bookings')
+        .single();
+
+      if (decrementError) {
+        console.error('Error decrementing current_bookings:', decrementError);
+        return NextResponse.json({ error: 'Error al actualizar contador de clase' }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ success: true }, { status: 200 });

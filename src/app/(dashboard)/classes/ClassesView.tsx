@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Clock, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Clock } from "lucide-react";
 import type { ClassTemplate } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,7 +58,6 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
       name: "",
       description: "",
       duration_minutes: 60,
-      capacity: 20,
       level: "all_levels" as Level,
       focus_area: ["crossfit"],
       color: "#3B82F6",
@@ -119,7 +118,6 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
         name: cls.name,
         description: cls.description || "",
         duration_minutes: cls.duration_minutes,
-        capacity: cls.capacity,
         level: cls.level as Level,
         focus_area: cls.focus_area || ["crossfit"],
         color: cls.color,
@@ -130,7 +128,6 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
         name: "",
         description: "",
         duration_minutes: 60,
-        capacity: 20,
         level: "all_levels" as Level,
         focus_area: ["crossfit"],
         color: "#3B82F6",
@@ -265,10 +262,6 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
                     <Clock className="h-4 w-4" />
                     <span>{cls.duration_minutes} min</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{cls.capacity} cupos</span>
-                  </div>
                 </div>
 
                 {(cls as unknown as { profiles?: { full_name?: string } })?.profiles && (
@@ -352,20 +345,6 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
                   <p className="text-xs text-error">{errors.duration_minutes.message}</p>
                 )}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="capacity" className="text-xs text-on_surface_variant uppercase tracking-wider">Cupos</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  {...register("capacity", { valueAsNumber: true })}
-                  min={1}
-                  max={100}
-                  className="h-11"
-                />
-                {errors.capacity && (
-                  <p className="text-xs text-error">{errors.capacity.message}</p>
-                )}
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -390,20 +369,38 @@ export function ClassesView({ initialClasses, gymId }: ClassesViewProps) {
                 )}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="color" className="text-xs text-on_surface_variant uppercase tracking-wider">Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="color"
-                    type="color"
-                    {...register("color")}
-                    className="w-12 p-1 h-11"
+                <Label className="text-xs text-on_surface_variant uppercase tracking-wider">Color</Label>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-11 w-11 rounded-md border shrink-0"
+                    style={{ backgroundColor: watch("color") }}
                   />
-                  <Input
-                    value={watch("color")}
-                    {...register("color")}
-                    placeholder="#3B82F6"
-                    className="h-11"
-                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 flex-1"
+                    onClick={() => {
+                      const COLORS = [
+                        "#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6",
+                        "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6",
+                        "#E11D48", "#D946EF", "#0EA5E9", "#84CC16", "#A855F7",
+                        "#EAB308", "#22D3EE", "#F43F5E", "#2DD4BF", "#FB923C",
+                        "#7C3AED", "#0891B2", "#65A30D", "#D97706", "#9333EA",
+                      ];
+                      const usedColors = classes
+                        .filter((c) => c.id !== editingClass?.id)
+                        .map((c) => c.color)
+                        .filter(Boolean);
+                      const available = COLORS.filter((c) => !usedColors.includes(c));
+                      const color = available.length > 0
+                        ? available[Math.floor(Math.random() * available.length)]
+                        : "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+                      setValue("color", color);
+                    }}
+                  >
+                    Color aleatorio
+                  </Button>
                 </div>
                 {errors.color && (
                   <p className="text-xs text-error">{errors.color.message}</p>

@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Calendar, Ticket, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getAthletes } from "@/lib/queries/athletes";
+import { countActiveAndTrial } from "@/lib/athletes";
 
 async function getMetrics(gymId: string) {
   const supabase = await createClient();
@@ -16,11 +18,8 @@ async function getMetrics(gymId: string) {
     .select("*", { count: "exact", head: true })
     .eq("gym_id", gymId);
 
-  const { count: activeAthletes } = await supabase
-    .from("athletes")
-    .select("*", { count: "exact", head: true })
-    .eq("gym_id", gymId)
-    .eq("is_active", true);
+  const athletes = await getAthletes(gymId);
+  const activeAthletes = countActiveAndTrial(athletes);
 
   const today = new Date().toISOString().split("T")[0];
 

@@ -28,6 +28,12 @@
   --color-outline_variant: hsl(0 22% 28%);
   --color-on_surface_variant: hsl(240 5% 65%);
 
+  --color-popover: hsl(240 5% 16%);
+  --color-popover-foreground: hsl(0 0% 98%);
+
+  --color-accent: hsl(240 5% 22%);
+  --color-accent-foreground: hsl(0 0% 98%);
+
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { athleteSchema } from '@/lib/validations';
+import { requireAuth } from '@/lib/auth/requireAuth';
+import { computeAthleteStatus } from '@/lib/athletes';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -32,37 +34,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  let filteredData = data || [];
+  const athletesWithStatus = (data || []).map((athlete) => ({
+    ...athlete,
+    computed_status: computeAthleteStatus(athlete),
+  }));
 
-  if (status === 'active') {
-    filteredData = filteredData.filter((a) => a.membership?.status === 'active');
-  } else if (status === 'expired') {
-    filteredData = filteredData.filter((a) => a.membership?.status === 'expired');
-  } else if (status === 'new') {
-    filteredData = filteredData.filter((a) => a.membership?.status === 'new');
+  if (status && status !== 'all') {
+    const filtered = athletesWithStatus.filter((a) => {
+      if (status === 'active') return a.computed_status === 'active' || a.computed_status === 'trial';
+      return a.computed_status === status;
+    });
+    return NextResponse.json(filtered);
   }
 
-  return NextResponse.json(filteredData);
+  return NextResponse.json(athletesWithStatus);
 }
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
-
-    const { data: currentProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, gym_id')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError || !currentProfile) {
-      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
-    }
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    const currentProfile = auth.profile;
 
     const body = await request.json();
     const validated = athleteSchema.parse(body);
@@ -108,7 +102,8 @@ export async function POST(request: NextRequest) {
         emergency_phone: validated.emergency_phone || null,
         health_notes: validated.health_notes || null,
         current_level: validated.current_level || 'beginner',
-        is_active: true,
+        status_override: validated.plan_id ? null : 'trial',
+        trial_ends_at: validated.plan_id ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       })
       .select()
       .single();
@@ -139,7 +134,6 @@ export async function POST(request: NextRequest) {
           athlete_id: athleteData.id,
           plan_id: validated.plan_id,
           gym_id: currentProfile.gym_id,
-          status: 'active',
           start_date: startDate,
           end_date: endDateStr,
           classes_used: 0,

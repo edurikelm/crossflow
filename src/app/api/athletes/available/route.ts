@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { computeAthleteStatus } from '@/lib/athletes';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -31,8 +32,7 @@ export async function GET(request: NextRequest) {
         profile:profiles(id, full_name, email, phone),
         membership:memberships(*, plan:membership_plans(id, name))
       `)
-      .eq('gym_id', profile.gym_id)
-      .eq('is_active', true);
+      .eq('gym_id', profile.gym_id);
 
     if (search) {
       query = query.or(`profile.full_name.ilike.%${search}%,profile.email.ilike.%${search}%`);
@@ -44,21 +44,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const availableAthletes = (athletes || []).filter((athlete) => {
-      const memberships = athlete.membership as Array<{
-        status: string;
-        end_date: string;
-        plan: { id: string; name: string } | null;
-      }> | null;
-
-      if (!memberships || memberships.length === 0) return false;
-
-      const activeMembership = memberships.some(
-        (m) => m.status === 'active' && m.end_date >= today
-      );
-
-      return activeMembership;
+    const availableAthletes = (athletes || []).filter((a) => {
+      const status = computeAthleteStatus(a);
+      return status === "active" || status === "trial";
     });
 
     let excludeIds: string[] = [];

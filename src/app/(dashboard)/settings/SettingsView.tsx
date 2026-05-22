@@ -47,13 +47,13 @@ export function SettingsView({ initialGym, initialPlans, gymId }: SettingsViewPr
   });
 
   const handleSaveGym = async () => {
-    if (!gym) return;
+    if (!initialGym) return;
     setIsSaving(true);
 
     await supabase
       .from("gyms")
       .update(gymData)
-      .eq("id", gym.id);
+      .eq("id", initialGym.id);
 
     setIsSaving(false);
   };

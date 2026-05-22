@@ -5,7 +5,7 @@ import type { ScheduledClassWithDetails, ClassTemplate } from "@/types";
 
 export type CoachSelect = { id: string; profile: { full_name: string } };
 
-export const getClassTemplates = cache(async (): Promise<ClassTemplate[]> => {
+export const getAllClassTemplates = cache(async (): Promise<ClassTemplate[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("class_templates")

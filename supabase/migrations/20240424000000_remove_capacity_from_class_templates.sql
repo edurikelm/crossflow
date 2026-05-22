@@ -1,0 +1,1 @@
+ALTER TABLE class_templates DROP COLUMN IF EXISTS capacity;

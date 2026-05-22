@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { athleteSchema } from '@/lib/validations';
+import { requireAuth } from '@/lib/auth/requireAuth';
+import { computeAthleteStatus } from '@/lib/athletes';
 
 export async function GET(
   request: NextRequest,
@@ -11,7 +13,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('athletes')
-    .select('*, membership_plans(*), user_profiles(*)')
+    .select('*, profile:profiles(*), memberships(*)')
     .eq('id', id)
     .single();
 
@@ -22,14 +24,19 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({
+    ...data,
+    computed_status: computeAthleteStatus(data),
+  });
 }
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) return auth;
+  const supabase = auth.supabase;
   const { id } = await params;
 
   try {
@@ -38,7 +45,7 @@ export async function PUT(
 
     const { data: athlete, error: fetchError } = await supabase
       .from('athletes')
-      .select('profile_id, gym_id')
+      .select('profile_id, gym_id, status_override')
       .eq('id', id)
       .single();
 
@@ -88,9 +95,10 @@ export async function PUT(
         return NextResponse.json({ error: 'Plan no encontrado' }, { status: 400 });
       }
 
-      const startDate = new Date();
+      const startDate = new Date().toISOString().split('T')[0];
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + planData.duration_days);
+      const endDateStr = endDate.toISOString().split('T')[0];
 
       const { data: existingMembership } = await supabase
         .from('memberships')
@@ -98,14 +106,20 @@ export async function PUT(
         .eq('athlete_id', id)
         .single();
 
+      if (athlete.status_override === 'trial' || athlete.status_override === 'paused') {
+        await supabase
+          .from('athletes')
+          .update({ status_override: null, trial_ends_at: null })
+          .eq('id', id);
+      }
+
       if (existingMembership) {
         await supabase
           .from('memberships')
           .update({
             plan_id: validated.plan_id,
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString(),
-            status: 'active',
+            start_date: startDate,
+            end_date: endDateStr,
           })
           .eq('athlete_id', id);
       } else {
@@ -115,9 +129,8 @@ export async function PUT(
             athlete_id: id,
             plan_id: validated.plan_id,
             gym_id: athlete.gym_id,
-            status: 'active',
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString(),
+            start_date: startDate,
+            end_date: endDateStr,
             classes_used: 0,
             auto_renew: false,
           });
@@ -137,7 +150,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) return auth;
+  const supabase = auth.supabase;
   const { id } = await params;
 
   const { error } = await supabase

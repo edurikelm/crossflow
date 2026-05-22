@@ -33,11 +33,18 @@ export const athleteSchema = z.object({
 
 export const athleteFilterSchema = z.object({
   search: z.string().optional(),
-  status: z.enum(["active", "expired", "new"]).optional(),
+  status: z.enum(["active", "trial", "expired", "paused", "suspended", "inactive"]).optional(),
   plan_id: z.string().uuid().optional(),
 });
 
+export const athleteStatusUpdateSchema = z.object({
+  status_override: z.enum(["trial", "paused", "suspended", "inactive"]).nullable(),
+  trial_ends_at: z.string().datetime().nullable().optional(),
+  reason: z.string().optional(),
+});
+
 export type AthleteInput = z.infer<typeof athleteSchema>;
+export type AthleteStatusUpdate = z.infer<typeof athleteStatusUpdateSchema>;
 
 // ============================================
 // CLASS SCHEMAS
@@ -58,7 +65,6 @@ export const classTemplateSchema = z.object({
     .positive()
     .min(15)
     .max(180),
-  capacity: z.number().int().positive().max(100),
   level: z.enum(["beginner", "intermediate", "advanced", "all_levels"]),
   focus_area: z.array(z.string()).min(1, "Al menos un enfoque"),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color inválido"),

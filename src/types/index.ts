@@ -9,11 +9,19 @@ export type UserRole =
   | "coach"
   | "reception";
 
-export type MembershipStatus =
+export type AthleteStatus =
   | "active"
-  | "paused"
+  | "trial"
   | "expired"
-  | "cancelled";
+  | "paused"
+  | "suspended"
+  | "inactive";
+
+export type AthleteStatusOverride =
+  | "trial"
+  | "paused"
+  | "suspended"
+  | "inactive";
 
 export type MembershipPlanType =
   | "monthly"
@@ -103,13 +111,15 @@ export interface Athlete {
   health_notes: string | null;
   current_level: ClassLevel;
   total_classes: number;
-  is_active: boolean;
+  status_override: AthleteStatusOverride | null;
+  trial_ends_at: string | null;
   created_at: string;
 }
 
 export interface AthleteWithProfile extends Athlete {
   profile: Profile;
   membership?: MembershipWithPlan[];
+  computed_status?: AthleteStatus;
 }
 
 // ============================================
@@ -154,7 +164,6 @@ export interface Membership {
   athlete_id: string;
   plan_id: string | null;
   gym_id: string;
-  status: MembershipStatus;
   start_date: string;
   end_date: string;
   classes_used: number;
@@ -183,7 +192,6 @@ export interface ClassTemplate {
   name: string;
   description: string | null;
   duration_minutes: number;
-  capacity: number;
   level: ClassLevel;
   focus_area: string[];
   color: string;
@@ -230,6 +238,20 @@ export interface Booking {
 
 export interface BookingWithAthlete extends Booking {
   athlete: AthleteWithProfile;
+}
+
+// ============================================
+// ATHLETE STATUS LOG
+// ============================================
+
+export interface AthleteStatusLog {
+  id: string;
+  athlete_id: string;
+  profile_id: string;
+  old_override: string | null;
+  new_override: string | null;
+  reason: string | null;
+  created_at: string;
 }
 
 // ============================================

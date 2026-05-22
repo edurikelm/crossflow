@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getScheduledClassesForWeek, getClassTemplates, getCoaches } from "@/lib/queries/calendar";
+import { getScheduledClassesForWeek, getAllClassTemplates, getCoaches } from "@/lib/queries/calendar";
 import { CalendarView } from "./CalendarView";
 import { startOfWeek } from "date-fns";
 
@@ -36,7 +36,7 @@ export default async function CalendarPage() {
 
   const [initialClasses, templates, coaches] = await Promise.all([
     getScheduledClassesForWeek(weekStart, gymId),
-    getClassTemplates(),
+    getAllClassTemplates(),
     getCoaches(gymId),
   ]);
 
