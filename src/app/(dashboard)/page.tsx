@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/getCurrentProfile";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/layout/PageHeader";
 import type { ScheduledClassWithDetails, TicketWithDetails } from "@/types";
@@ -81,23 +81,7 @@ async function getRecentTickets(gymId: string) {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("gym_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    redirect("/login");
-  }
-
+  const profile = await getCurrentProfile();
   const gymId = profile.gym_id;
   const metrics = await getMetrics(gymId);
   const todayClasses = await getTodayClasses(gymId);

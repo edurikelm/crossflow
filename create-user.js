@@ -1,6 +1,6 @@
 import https from 'node:https';
 
-const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaGNvandwbGdtbWVmam1peWxlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njc3Mjc3NCwiZXhwIjoyMDkyMzQ4Nzc0fQ.UbmtSLlH_yYi0f6PiB49D6Kzg_wc4HRW835-SvP-fxg';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const email = 'admin@crossfit.com';
 const password = 'Admin123!';
